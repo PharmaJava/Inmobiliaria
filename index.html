@@ -476,6 +476,53 @@
             }
         }
 
+        /* Estilos para la tabla de proyecciones */
+        .projection-table-container {
+            overflow-x: auto;
+            margin: 2rem 0;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            background: var(--white);
+            border: 1px solid var(--border);
+        }
+
+        .projection-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .projection-table th,
+        .projection-table td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .projection-table th {
+            background: var(--light);
+            color: var(--dark);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .projection-table td:first-child,
+        .projection-table th:first-child {
+            text-align: left;
+        }
+
+        .projection-table tbody tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .projection-table .metric-positive { color: var(--success); }
+        .projection-table .metric-negative { color: var(--danger); }
+        .projection-table .metric-info { color: var(--primary); }
+
         @media (max-width: 768px) {
             .main-content {
                 padding: 2rem 1rem;
@@ -501,6 +548,15 @@
 
             .results-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .projection-table {
+                font-size: 0.8rem;
+            }
+
+            .projection-table th,
+            .projection-table td {
+                padding: 0.75rem;
             }
         }
 
@@ -569,7 +625,7 @@
                             <div class="form-group">
                                 <label class="form-label">Precio de compra</label>
                                 <div class="input-group">
-                                    <input type="number" id="precio" class="form-input with-suffix" value="140000" min="0">
+                                    <input type="number" id="precio" class="form-input with-suffix" value="140000" min="0" step="1000">
                                     <span class="input-suffix">€</span>
                                 </div>
                             </div>
@@ -585,7 +641,7 @@
                             <div class="form-group">
                                 <label class="form-label">Gastos de compra-venta</label>
                                 <div class="input-group">
-                                    <input type="number" id="gastosCompra" class="form-input with-suffix" value="3500" min="0">
+                                    <input type="number" id="gastosCompra" class="form-input with-suffix" value="3500" min="0" step="100">
                                     <span class="input-suffix">€</span>
                                 </div>
                             </div>
@@ -596,7 +652,7 @@
                             <div class="form-group">
                                 <label class="form-label">Porcentaje de entrada</label>
                                 <div class="input-group">
-                                    <input type="number" id="entrada" class="form-input with-suffix" value="20" min="0" max="100">
+                                    <input type="number" id="entrada" class="form-input with-suffix" value="20" min="0" max="100" step="1">
                                     <span class="input-suffix">%</span>
                                 </div>
                             </div>
@@ -611,13 +667,13 @@
 
                             <div class="form-group">
                                 <label class="form-label">Años de hipoteca</label>
-                                <input type="number" id="anos" class="form-input" value="25" min="5" max="40">
+                                <input type="number" id="anos" class="form-input" value="25" min="5" max="40" step="1">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Gastos de hipoteca</label>
                                 <div class="input-group">
-                                    <input type="number" id="gastosHipoteca" class="form-input with-suffix" value="2500" min="0">
+                                    <input type="number" id="gastosHipoteca" class="form-input with-suffix" value="2500" min="0" step="100">
                                     <span class="input-suffix">€</span>
                                 </div>
                             </div>
@@ -628,14 +684,14 @@
                             <div class="form-group">
                                 <label class="form-label">Alquiler mensual</label>
                                 <div class="input-group">
-                                    <input type="number" id="alquiler" class="form-input with-suffix" value="800" min="0">
+                                    <input type="number" id="alquiler" class="form-input with-suffix" value="800" min="0" step="50">
                                     <span class="input-suffix">€/mes</span>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Meses vacío al año</label>
-                                <input type="number" id="mesesVacio" class="form-input" value="1" min="0" max="12">
+                                <input type="number" id="mesesVacio" class="form-input" value="1" min="0" max="12" step="0.5">
                             </div>
 
                             <div class="form-group">
@@ -648,7 +704,7 @@
 
                             <div class="form-group">
                                 <label class="form-label">Años de análisis</label>
-                                <input type="number" id="anosAnalisis" class="form-input" value="20" min="1" max="40">
+                                <input type="number" id="anosAnalisis" class="form-input" value="20" min="1" max="40" step="1">
                             </div>
                         </div>
 
@@ -657,7 +713,7 @@
                             <div class="form-group">
                                 <label class="form-label">IBI anual</label>
                                 <div class="input-group">
-                                    <input type="number" id="ibi" class="form-input with-suffix" value="500" min="0">
+                                    <input type="number" id="ibi" class="form-input with-suffix" value="500" min="0" step="50">
                                     <span class="input-suffix">€/año</span>
                                 </div>
                             </div>
@@ -665,7 +721,7 @@
                             <div class="form-group">
                                 <label class="form-label">Gastos de comunidad</label>
                                 <div class="input-group">
-                                    <input type="number" id="comunidad" class="form-input with-suffix" value="80" min="0">
+                                    <input type="number" id="comunidad" class="form-input with-suffix" value="80" min="0" step="10">
                                     <span class="input-suffix">€/mes</span>
                                 </div>
                             </div>
@@ -673,7 +729,7 @@
                             <div class="form-group">
                                 <label class="form-label">Seguro de hogar</label>
                                 <div class="input-group">
-                                    <input type="number" id="seguro" class="form-input with-suffix" value="300" min="0">
+                                    <input type="number" id="seguro" class="form-input with-suffix" value="300" min="0" step="50">
                                     <span class="input-suffix">€/año</span>
                                 </div>
                             </div>
@@ -681,7 +737,7 @@
                             <div class="form-group">
                                 <label class="form-label">Mantenimiento y reparaciones</label>
                                 <div class="input-group">
-                                    <input type="number" id="mantenimiento" class="form-input with-suffix" value="500" min="0">
+                                    <input type="number" id="mantenimiento" class="form-input with-suffix" value="500" min="0" step="50">
                                     <span class="input-suffix">€/año</span>
                                 </div>
                             </div>
@@ -689,8 +745,16 @@
                             <div class="form-group">
                                 <label class="form-label">Administración/Gestión</label>
                                 <div class="input-group">
-                                    <input type="number" id="administracion" class="form-input with-suffix" value="60" min="0">
+                                    <input type="number" id="administracion" class="form-input with-suffix" value="60" min="0" step="10">
                                     <span class="input-suffix">€/mes</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Incremento anual de gastos</label>
+                                <div class="input-group">
+                                    <input type="number" id="incrementoGastos" class="form-input with-suffix" value="0" min="0" max="10" step="0.1">
+                                    <span class="input-suffix">%</span>
                                 </div>
                             </div>
                         </div>
@@ -716,7 +780,7 @@
                             <div class="form-group">
                                 <label class="form-label">Impuesto plusvalía municipal</label>
                                 <div class="input-group">
-                                    <input type="number" id="plusvalia" class="form-input with-suffix" value="2000" min="0">
+                                    <input type="number" id="plusvalia" class="form-input with-suffix" value="2000" min="0" step="100">
                                     <span class="input-suffix">€</span>
                                 </div>
                             </div>
@@ -743,14 +807,14 @@
                         <div class="card-title">
                             📊 Análisis de Rentabilidad
                         </div>
-                        <div class="card-subtitle">Resultados completos de tu inversión a 20 años</div>
+                        <div class="card-subtitle">Resultados completos de tu inversión a largo plazo</div>
                     </div>
                     <div class="card-body">
                         <div id="resultados">
                             <div class="empty-state">
                                 <div class="empty-state-icon">📈</div>
                                 <h3>¡Analiza tu inversión inmobiliaria!</h3>
-                                <p>Completa los datos en el panel izquierdo y haz clic en "Analizar Inversión" para obtener un análisis detallado de rentabilidad con proyección a 20 años.</p>
+                                <p>Completa los datos en el panel izquierdo y haz clic en "Analizar Inversión" para obtener un análisis detallado de rentabilidad con proyección a largo plazo.</p>
                             </div>
                         </div>
                     </div>
@@ -760,11 +824,10 @@
 
         <!-- Resumen flotante -->
         <div class="floating-summary" id="floatingSummary">
-            <div style="font-weight: 600; margin-bottom: 0.5rem;">Rentabilidad TIR</div>
+            <div style="font-weight: 600; margin-bottom: 0.5rem;">Rentabilidad por flujo</div>
             <div id="floatingValue" style="font-size: 1.6rem; font-weight: 800;">-</div>
         </div>
     </div>
-
     <script>
         // Variables globales
         const scenarios = {
@@ -773,21 +836,24 @@
                 incrementoAlquiler: 2,
                 mesesVacio: 2,
                 mantenimiento: 1200,
-                interes: 4.0
+                interes: 4.0,
+                incrementoGastos: 0
             },
             moderado: {
                 revalorizacion: 2.5,
                 incrementoAlquiler: 3,
                 mesesVacio: 1,
                 mantenimiento: 1000,
-                interes: 3.5
+                interes: 3.5,
+                incrementoGastos: 0
             },
             optimista: {
                 revalorizacion: 4.0,
                 incrementoAlquiler: 4,
                 mesesVacio: 0.5,
                 mantenimiento: 800,
-                interes: 3.0
+                interes: 3.0,
+                incrementoGastos: 0
             }
         };
 
@@ -797,7 +863,6 @@
             if (!particlesContainer) return;
             
             const particleCount = 30;
-            
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
@@ -821,6 +886,7 @@
             document.getElementById('mesesVacio').value = config.mesesVacio;
             document.getElementById('mantenimiento').value = config.mantenimiento;
             document.getElementById('interes').value = config.interes;
+            document.getElementById('incrementoGastos').value = config.incrementoGastos;
             
             // Actualizar botones
             document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
@@ -834,18 +900,15 @@
         function switchTab(tabName) {
             console.log('Cambiando a tab:', tabName);
             
-            // Ocultar todos los contenidos
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             
-            // Mostrar el seleccionado
             const targetTab = document.getElementById(tabName + '-tab');
             if (targetTab) {
                 targetTab.classList.add('active');
             }
             
-            // Actualizar botones
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
         }
@@ -855,7 +918,7 @@
             const element = document.getElementById(id);
             if (!element) return defaultValue;
             const value = parseFloat(element.value);
-            return isNaN(value) ? defaultValue : value;
+            return isNaN(value) ? defaultValue : Math.max(0, value);
         }
 
         // Obtener valor de texto
@@ -871,8 +934,17 @@
             
             const i = interes / 100 / 12;
             const n = anos * 12;
-            
             return (capital * i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+        }
+
+        // Calcular saldo pendiente del préstamo
+        function calcularSaldoPendiente(capital, interes, anos, year) {
+            if (capital <= 0 || anos <= 0 || year >= anos) return 0;
+            const i = interes / 100 / 12;
+            const n = anos * 12;
+            const pagosRealizados = year * 12;
+            const cuota = calcularCuotaHipoteca(capital, interes, anos);
+            return capital * Math.pow(1 + i, pagosRealizados) - cuota * (Math.pow(1 + i, pagosRealizados) - 1) / i;
         }
 
         // Calcular impuestos
@@ -909,11 +981,20 @@
                 const seguro = getValue('seguro', 300);
                 const mantenimiento = getValue('mantenimiento', 500);
                 const administracion = getValue('administracion', 60);
+                const incrementoGastos = getValue('incrementoGastos', 0);
                 
                 const revalorizacion = getValue('revalorizacion', 2.5);
                 const gastosVenta = getValue('gastosVenta', 8);
                 const plusvalia = getValue('plusvalia', 2000);
                 const irpfVenta = getValue('irpfVenta', 19);
+
+                // Validaciones
+                if (anosAnalisis < 1 || anos < 1) {
+                    throw new Error('Los años de análisis y hipoteca deben ser mayores a 0.');
+                }
+                if (mesesVacio > 12) {
+                    throw new Error('Los meses vacíos no pueden superar los 12 meses.');
+                }
 
                 // Cálculos básicos
                 const impuestos = calcularImpuestos(precio, tipoVivienda);
@@ -932,18 +1013,52 @@
                 let flujoAcumulado = 0;
                 let valorVivienda = precio;
                 let alquilerActual = alquiler;
+                let ibiActual = ibi;
+                let comunidadActual = comunidad;
+                let seguroActual = seguro;
+                let mantenimientoActual = mantenimiento;
+                let administracionActual = administracion;
+                const proyecciones = [];
 
                 for (let year = 1; year <= anosAnalisis; year++) {
                     const ingresosAlquiler = alquilerActual * mesesOcupados;
-                    const gastosFijos = (cuotaHipoteca * 12) + ibi + seguro + mantenimiento + (comunidad * 12) + (administracion * 12);
+                    const gastosFijos = (cuotaHipoteca * 12) + ibiActual + seguroActual + mantenimientoActual + (comunidadActual * 12) + (administracionActual * 12);
                     const flujoAnual = ingresosAlquiler - gastosFijos;
+                    const rentabilidadFlujo = (flujoAnual / inversionInicial) * 100;
+                    const saldoPendiente = calcularSaldoPendiente(capitalPrestamo, interes, anos, year);
                     
+                    const precioVentaBruto = valorVivienda;
+                    const gastosVentaEuros = precioVentaBruto * (gastosVenta / 100);
+                    const gananciaCapital = Math.max(0, precioVentaBruto - precio);
+                    const impuestosGanancias = gananciaCapital * (irpfVenta / 100);
+                    const precioVentaNeto = precioVentaBruto - gastosVentaEuros - plusvalia - impuestosGanancias;
+                    const beneficioVenta = precioVentaNeto - saldoPendiente;
+                    const beneficioAcumulado = flujoAcumulado + flujoAnual + beneficioVenta - inversionInicial;
+
+                    proyecciones.push({
+                        year,
+                        ingresosAlquiler,
+                        gastosFijos,
+                        cuotaHipoteca: cuotaHipoteca * 12,
+                        flujoAnual,
+                        rentabilidadFlujo,
+                        valorVivienda,
+                        saldoPendiente,
+                        precioVentaNeto,
+                        beneficioAcumulado
+                    });
+
                     flujoAcumulado += flujoAnual;
                     valorVivienda *= (1 + revalorizacion / 100);
                     alquilerActual *= (1 + incrementoAlquiler / 100);
+                    ibiActual *= (1 + incrementoGastos / 100);
+                    comunidadActual *= (1 + incrementoGastos / 100);
+                    seguroActual *= (1 + incrementoGastos / 100);
+                    mantenimientoActual *= (1 + incrementoGastos / 100);
+                    administracionActual *= (1 + incrementoGastos / 100);
                 }
 
-                // Cálculo venta
+                // Cálculo final (para el último año)
                 const precioVentaBruto = valorVivienda;
                 const gastosVentaEuros = precioVentaBruto * (gastosVenta / 100);
                 const gananciaCapital = Math.max(0, precioVentaBruto - precio);
@@ -957,7 +1072,6 @@
                     (Math.pow(valorFinal / inversionInicial, 1 / anosAnalisis) - 1) * 100 : 0;
 
                 const datos = {
-                    // Valores principales
                     inversionInicial,
                     flujoMensual,
                     flujoAcumulado,
@@ -965,15 +1079,11 @@
                     beneficioTotal,
                     precioVentaNeto,
                     precioVentaBruto,
-                    
-                    // Desglose inversión inicial
                     montoEntrada,
                     impuestos,
                     gastosCompra,
                     gastosHipoteca,
                     entrada,
-                    
-                    // Desglose mensual
                     ingresosMensuales,
                     cuotaHipoteca,
                     comunidad,
@@ -981,14 +1091,11 @@
                     seguro,
                     mantenimiento,
                     administracion,
-                    
-                    // Desglose venta
                     gastosVentaEuros,
                     plusvalia,
                     impuestosGanancias,
-                    
-                    // Otros
-                    anosAnalisis
+                    anosAnalisis,
+                    proyecciones
                 };
 
                 console.log('Datos calculados:', datos);
@@ -1021,6 +1128,48 @@
             let flujoClass = datos.flujoMensual > 0 ? 'metric-positive' : 'metric-negative';
             let beneficioClass = datos.beneficioTotal > 0 ? 'metric-positive' : 'metric-negative';
 
+            // Generar tabla de proyecciones
+            let tablaProyecciones = `
+                <div class="projection-table-container">
+                    <table class="projection-table">
+                        <thead>
+                            <tr>
+                                <th>Año</th>
+                                <th>Ingresos Alquiler</th>
+                                <th>Gastos</th>
+                                <th>Hipoteca</th>
+                                <th>Flujo de Caja</th>
+                                <th>Rentabilidad Flujo (%)</th>
+                                <th>Valor Inmueble</th>
+                                <th>Préstamo Restante</th>
+                                <th>Neto si Vende</th>
+                                <th>Beneficio Acumulado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            datos.proyecciones.forEach(proy => {
+                tablaProyecciones += `
+                    <tr>
+                        <td>${proy.year}</td>
+                        <td class="metric-positive">+${proy.ingresosAlquiler.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td class="metric-negative">-${(proy.gastosFijos - proy.cuotaHipoteca).toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td class="metric-negative">-${proy.cuotaHipoteca.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td class="${proy.flujoAnual >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.flujoAnual.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td class="${proy.rentabilidadFlujo >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.rentabilidadFlujo.toFixed(2)}%</td>
+                        <td>${proy.valorVivienda.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td>${proy.saldoPendiente.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td class="metric-info">${proy.precioVentaNeto.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td class="${proy.beneficioAcumulado >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.beneficioAcumulado.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                    </tr>
+                `;
+            });
+            tablaProyecciones += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
             resultadosDiv.innerHTML = `
                 <div class="results-grid">
                     <div class="metric-card">
@@ -1038,7 +1187,7 @@
                             <div class="metric-icon">${datos.flujoMensual >= 0 ? '📈' : '📉'}</div>
                         </div>
                         <div class="metric-value ${flujoClass}">${datos.flujoMensual.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</div>
-                        <div class="metric-subtitle">Cashflow mensual neto</div>
+                        <div class="metric-subtitle">Cashflow mensual neto (Año 1)</div>
                     </div>
 
                     <div class="metric-card">
@@ -1095,6 +1244,14 @@
                     🚀 <strong>Excelente Rentabilidad:</strong> Esta inversión supera significativamente la media del mercado inmobiliario español (4-6% anual).
                 </div>
                 ` : ''}
+
+                <!-- Proyecciones Año por Año -->
+                <div style="background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); margin: 2rem 0; border: 1px solid var(--border);">
+                    <div style="background: linear-gradient(135deg, var(--light) 0%, #e2e8f0 100%); padding: 1.5rem 2rem; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 0.75rem; font-size: 1.1rem;">
+                        📅 Proyecciones Año por Año
+                    </div>
+                    ${tablaProyecciones}
+                </div>
 
                 <!-- Desglose de Inversión Inicial -->
                 <div style="background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); margin: 2rem 0; border: 1px solid var(--border);">
@@ -1260,6 +1417,6 @@
             
             console.log('Aplicación inicializada correctamente');
         });
-    </script>
+    </script>   
 </body>
 </html>
