@@ -770,6 +770,14 @@
                                     <span class="input-suffix">%</span>
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Tasa impositiva sobre alquiler neto</label>
+                                <div class="input-group">
+                                    <input type="number" id="taxAlquiler" class="form-input with-suffix" value="21" min="0" max="47" step="0.1">
+                                    <span class="input-suffix">%</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Tab: Revalorización -->
@@ -851,7 +859,8 @@
                 mantenimiento: 1200,
                 interes: 4.0,
                 incrementoGastos: 0,
-                financiacionTipo: 'con_hipoteca'
+                financiacionTipo: 'con_hipoteca',
+                taxAlquiler: 21
             },
             moderado: {
                 revalorizacion: 2.5,
@@ -860,7 +869,8 @@
                 mantenimiento: 1000,
                 interes: 3.5,
                 incrementoGastos: 0,
-                financiacionTipo: 'con_hipoteca'
+                financiacionTipo: 'con_hipoteca',
+                taxAlquiler: 21
             },
             optimista: {
                 revalorizacion: 4.0,
@@ -869,7 +879,8 @@
                 mantenimiento: 800,
                 interes: 3.0,
                 incrementoGastos: 0,
-                financiacionTipo: 'con_hipoteca'
+                financiacionTipo: 'con_hipoteca',
+                taxAlquiler: 21
             }
         };
 
@@ -915,6 +926,7 @@
             document.getElementById('interes').value = config.interes;
             document.getElementById('incrementoGastos').value = config.incrementoGastos;
             document.getElementById('financiacionTipo').value = config.financiacionTipo;
+            document.getElementById('taxAlquiler').value = config.taxAlquiler;
             
             // Actualizar botones
             document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
@@ -970,7 +982,7 @@
             return (capital * i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
         }
 
-        // Calcular saldo pendiente del préstamo
+        // Calcular saldo pendiente del inmueble
         function calcularSaldoPendiente(capital, interes, anos, year) {
             if (capital <= 0 || anos <= 0 || year >= anos) return 0;
             const i = interes / 100 / 12;
@@ -1016,6 +1028,7 @@
                 const mantenimiento = getValue('mantenimiento', 500);
                 const administracion = getValue('administracion', 60);
                 const incrementoGastos = getValue('incrementoGastos', 0);
+                const taxAlquiler = getValue('taxAlquiler', 21);
                 
                 const revalorizacion = getValue('revalorizacion', 2.5);
                 const gastosVenta = getValue('gastosVenta', 8);
@@ -1041,10 +1054,26 @@
                 const cuotaHipoteca = calcularCuotaHipoteca(capitalPrestamo, interes, anos);
                 const mesesOcupados = 12 - mesesVacio;
 
-                // Ingresos y gastos mensuales del primer año
-                const ingresosMensuales = (alquiler * mesesOcupados) / 12;
-                const gastosMensualesFijos = cuotaHipoteca + comunidad + administracion + (ibi + seguro + mantenimiento) / 12;
-                const flujoMensual = ingresosMensuales - gastosMensualesFijos;
+                // Calcular ingresos y gastos del primer año
+                const ingresosAlquiler = alquiler * mesesOcupados;
+                const gastosFijos = (cuotaHipoteca * 12) + ibi + seguro + mantenimiento + (comunidad * 12) + (administracion * 12);
+                let interest_anual = 0;
+                let remaining = capitalPrestamo;
+                if (financiacionTipo === 'con_hipoteca' && capitalPrestamo > 0) {
+                    let remaining_year = remaining;
+                    for (let m = 0; m < 12; m++) {
+                        const interest_month = remaining_year * (interes / 100 / 12);
+                        const principal_month = cuotaHipoteca - interest_month;
+                        remaining_year -= principal_month;
+                        interest_anual += interest_month;
+                    }
+                }
+                const operativos = gastosFijos - (cuotaHipoteca * 12);
+                const net_for_tax = ingresosAlquiler - operativos - interest_anual;
+                const tax_anual = Math.max(0, net_for_tax) * (taxAlquiler / 100);
+                const taxMensual = tax_anual / 12; // Calcular impuesto mensual
+                const flujoMensual = (ingresosAlquiler - gastosFijos - tax_anual) / 12;
+                const ingresosMensuales = ingresosAlquiler / 12;
 
                 // Simulación año por año
                 let flujoAcumulado = 0;
@@ -1058,12 +1087,25 @@
                 const proyecciones = [];
 
                 for (let year = 1; year <= anosAnalisis; year++) {
-                    const ingresosAlquiler = alquilerActual * mesesOcupados;
-                    const gastosFijos = (cuotaHipoteca * 12) + ibiActual + seguroActual + mantenimientoActual + (comunidadActual * 12) + (administracionActual * 12);
-                    const flujoAnual = ingresosAlquiler - gastosFijos;
+                    const ingresosAlquilerAnual = alquilerActual * mesesOcupados;
+                    const gastosFijosAnual = (cuotaHipoteca * 12) + ibiActual + seguroActual + mantenimientoActual + (comunidadActual * 12) + (administracionActual * 12);
+                    let interest_anual_loop = 0;
+                    if (financiacionTipo === 'con_hipoteca' && capitalPrestamo > 0) {
+                        let remaining_year = remaining;
+                        for (let m = 0; m < 12; m++) {
+                            const interest_month = remaining_year * (interes / 100 / 12);
+                            const principal_month = cuotaHipoteca - interest_month;
+                            remaining_year -= principal_month;
+                            interest_anual_loop += interest_month;
+                        }
+                    }
+                    const operativos_loop = gastosFijosAnual - (cuotaHipoteca * 12);
+                    const net_for_tax_loop = ingresosAlquilerAnual - operativos_loop - interest_anual_loop;
+                    const tax_loop = Math.max(0, net_for_tax_loop) * (taxAlquiler / 100);
+                    const flujoAnual = ingresosAlquilerAnual - gastosFijosAnual - tax_loop;
                     const rentabilidadFlujo = (flujoAnual / inversionInicial) * 100;
                     const saldoPendiente = financiacionTipo === 'sin_hipoteca' ? 0 : calcularSaldoPendiente(capitalPrestamo, interes, anos, year);
-                    
+
                     const precioVentaBruto = valorVivienda;
                     const gastosVentaEuros = precioVentaBruto * (gastosVenta / 100);
                     const gananciaCapital = Math.max(0, precioVentaBruto - precio);
@@ -1074,9 +1116,10 @@
 
                     proyecciones.push({
                         year,
-                        ingresosAlquiler,
-                        gastosFijos,
+                        ingresosAlquiler: ingresosAlquilerAnual,
+                        gastosFijos: gastosFijosAnual,
                         cuotaHipoteca: cuotaHipoteca * 12,
+                        tax: tax_loop,
                         flujoAnual,
                         rentabilidadFlujo,
                         valorVivienda,
@@ -1093,6 +1136,9 @@
                     seguroActual *= (1 + incrementoGastos / 100);
                     mantenimientoActual *= (1 + incrementoGastos / 100);
                     administracionActual *= (1 + incrementoGastos / 100);
+                    if (financiacionTipo === 'con_hipoteca' && capitalPrestamo > 0) {
+                        remaining = saldoPendiente;
+                    }
                 }
 
                 // Cálculo final (para el último año)
@@ -1133,7 +1179,8 @@
                     impuestosGanancias,
                     anosAnalisis,
                     proyecciones,
-                    financiacionTipo
+                    financiacionTipo,
+                    taxMensual
                 };
 
                 console.log('Datos calculados:', datos);
@@ -1176,6 +1223,7 @@
                                 <th>Ingresos Alquiler</th>
                                 <th>Gastos</th>
                                 <th>Hipoteca</th>
+                                <th>Impuestos</th>
                                 <th>Flujo de Caja</th>
                                 <th>Rentabilidad Flujo (%)</th>
                                 <th>Valor Inmueble</th>
@@ -1193,6 +1241,7 @@
                         <td class="metric-positive">+${proy.ingresosAlquiler.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
                         <td class="metric-negative">-${(proy.gastosFijos - proy.cuotaHipoteca).toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
                         <td class="metric-negative">-${proy.cuotaHipoteca.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td class="metric-negative">-${proy.tax.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
                         <td class="${proy.flujoAnual >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.flujoAnual.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
                         <td class="${proy.rentabilidadFlujo >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.rentabilidadFlujo.toFixed(2)}%</td>
                         <td>${proy.valorVivienda.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
@@ -1327,28 +1376,32 @@
                             <span style="font-weight: 700; color: var(--danger);">-${datos.cuotaHipoteca.toLocaleString('es-ES')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Gastos Comunidad</span>
+                            <span style="color: var(--text); font-weight: 500;">Gastos de Comunidad</span>
                             <span style="font-weight: 700; color: var(--danger);">-${datos.comunidad.toLocaleString('es-ES')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">IBI (Mensual)</span>
+                            <span style="color: var(--text); font-weight: 500;">IBI (mensual)</span>
                             <span style="font-weight: 700; color: var(--danger);">-${(datos.ibi / 12).toLocaleString('es-ES')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Seguro (Mensual)</span>
+                            <span style="color: var(--text); font-weight: 500;">Seguro de hogar (mensual)</span>
                             <span style="font-weight: 700; color: var(--danger);">-${(datos.seguro / 12).toLocaleString('es-ES')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Mantenimiento (Mensual)</span>
+                            <span style="color: var(--text); font-weight: 500;">Mantenimiento (mensual)</span>
                             <span style="font-weight: 700; color: var(--danger);">-${(datos.mantenimiento / 12).toLocaleString('es-ES')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
                             <span style="color: var(--text); font-weight: 500;">Administración</span>
                             <span style="font-weight: 700; color: var(--danger);">-${datos.administracion.toLocaleString('es-ES')} €</span>
                         </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
+                            <span style="color: var(--text); font-weight: 500;">Impuestos sobre alquiler (mensualizado)</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${datos.taxMensual.toLocaleString('es-ES')} €</span>
+                        </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; background: var(--light); font-weight: 700; color: var(--dark);">
-                            <span><strong>FLUJO MENSUAL NETO</strong></span>
-                            <span class="${flujoClass}"><strong>${datos.flujoMensual.toLocaleString('es-ES')} €</strong></span>
+                            <span><strong>CASHFLOW NETO</strong></span>
+                            <span style="color: ${datos.flujoMensual >= 0 ? 'var(--success)' : 'var(--danger)'}"><strong>${datos.flujoMensual.toLocaleString('es-ES')} €</strong></span>
                         </div>
                     </div>
                 </div>
@@ -1461,28 +1514,25 @@
                 calcularBtn.addEventListener('click', calcular);
             }
 
-            // Configurar eventos para inputs
-            document.querySelectorAll('input, select').forEach(input => {
+            // Configurar evento para cambio en tipo de financiación
+            const financiacionTipo = document.getElementById('financiacionTipo');
+            if (financiacionTipo) {
+                financiacionTipo.addEventListener('change', toggleFinanciacionInputs);
+            }
+
+            // Configurar eventos para inputs (recalcular al cambiar cualquier valor)
+            const inputs = document.querySelectorAll('.form-input, .form-select');
+            inputs.forEach(input => {
                 input.addEventListener('input', () => {
-                    clearTimeout(window.autoCalcTimeout);
-                    window.autoCalcTimeout = setTimeout(calcular, 800);
+                    // Desmarcar escenarios predefinidos cuando se modifica cualquier input
+                    document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+                    setTimeout(calcular, 100);
                 });
             });
 
-            // Configurar evento para el select de tipo de financiación
-            const financiacionTipoSelect = document.getElementById('financiacionTipo');
-            if (financiacionTipoSelect) {
-                financiacionTipoSelect.addEventListener('change', toggleFinanciacionInputs);
-            }
-            
-            // Inicializar estado de inputs de hipoteca
-            toggleFinanciacionInputs();
-            
-            // Cálculo inicial
-            setTimeout(calcular, 500);
-            
-            console.log('Aplicación inicializada correctamente');
+            // Cargar escenario moderado por defecto
+            loadScenario('moderado');
         });
-    </script>   
+    </script>
 </body>
 </html>
