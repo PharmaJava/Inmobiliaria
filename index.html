@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Inversión Inmobiliaria</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Real Estate Investment Calculator | Calculadora de Inversión Inmobiliaria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
     <style>
         * {
             margin: 0;
@@ -101,6 +101,33 @@
             font-size: 1.2rem;
             opacity: 0.9;
             font-weight: 400;
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        .language-selector select {
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .language-selector option {
+            background: var(--dark);
+            color: white;
         }
 
         .main-content {
@@ -585,271 +612,236 @@
     </style>
 </head>
 <body>
-    <div class="bg-particles" id="particles"></div>
-    
-    <div class="app-container">
-        <header class="header">
-            <h1>🏠 Calculadora de Inversión Inmobiliaria</h1>
-            <p>Análisis completo para inversión en alquiler - España</p>
-        </header>
-
-        <main class="main-content">
-            <div class="content-grid">
-                <!-- Panel de Configuración -->
-                <div class="glass-card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            ⚙️ Configuración de Inversión
-                        </div>
-                        <div class="card-subtitle">Personaliza todos los parámetros de tu análisis</div>
-                    </div>
-                    <div class="card-body">
-                        <!-- Selector de Escenarios -->
-                        <div class="scenario-selector">
-                            <button class="scenario-btn active" data-scenario="conservador">
-                                🛡️ Conservador
-                            </button>
-                            <button class="scenario-btn" data-scenario="moderado">
-                                ⚖️ Moderado
-                            </button>
-                            <button class="scenario-btn" data-scenario="optimista">
-                                🚀 Optimista
-                            </button>
-                        </div>
-
-                        <div class="nav-tabs">
-                            <button class="nav-tab active" data-tab="propiedad">🏠 Propiedad</button>
-                            <button class="nav-tab" data-tab="financiacion">💰 Financiación</button>
-                            <button class="nav-tab" data-tab="ingresos">📈 Ingresos</button>
-                            <button class="nav-tab" data-tab="gastos">📊 Gastos</button>
-                            <button class="nav-tab" data-tab="revalorizacion">💎 Revalorización</button>
-                        </div>
-
-                        <!-- Tab: Propiedad -->
-                        <div class="tab-content active" id="propiedad-tab">
-                            <div class="form-group">
-                                <label class="form-label">Precio de compra</label>
-                                <div class="input-group">
-                                    <input type="number" id="precio" class="form-input with-suffix" value="140000" min="0" step="1000">
-                                    <span class="input-suffix">€</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Tipo de vivienda</label>
-                                <select id="tipoVivienda" class="form-select">
-                                    <option value="segunda">Segunda vivienda (10% ITP)</option>
-                                    <option value="nueva">Vivienda nueva (10% IVA + 1.2% AJD)</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Gastos de compra-venta</label>
-                                <div class="input-group">
-                                    <input type="number" id="gastosCompra" class="form-input with-suffix" value="3500" min="0" step="100">
-                                    <span class="input-suffix">€</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tab: Financiación -->
-                        <div class="tab-content" id="financiacion-tab">
-                            <div class="form-group">
-                                <label class="form-label">Tipo de financiación</label>
-                                <select id="financiacionTipo" class="form-select">
-                                    <option value="con_hipoteca">Con hipoteca</option>
-                                    <option value="sin_hipoteca">Sin hipoteca</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Porcentaje de entrada</label>
-                                <div class="input-group">
-                                    <input type="number" id="entrada" class="form-input with-suffix" value="20" min="0" max="100" step="1">
-                                    <span class="input-suffix">%</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Tipo de interés hipoteca</label>
-                                <div class="input-group">
-                                    <input type="number" id="interes" class="form-input with-suffix" value="2.5" min="0" max="15" step="0.1">
-                                    <span class="input-suffix">%</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Años de hipoteca</label>
-                                <input type="number" id="anos" class="form-input" value="25" min="5" max="40" step="1">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Gastos de hipoteca</label>
-                                <div class="input-group">
-                                    <input type="number" id="gastosHipoteca" class="form-input with-suffix" value="2500" min="0" step="100">
-                                    <span class="input-suffix">€</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tab: Ingresos -->
-                        <div class="tab-content" id="ingresos-tab">
-                            <div class="form-group">
-                                <label class="form-label">Alquiler mensual</label>
-                                <div class="input-group">
-                                    <input type="number" id="alquiler" class="form-input with-suffix" value="800" min="0" step="50">
-                                    <span class="input-suffix">€/mes</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Meses vacío al año</label>
-                                <input type="number" id="mesesVacio" class="form-input" value="1" min="0" max="12" step="0.5">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Incremento anual del alquiler</label>
-                                <div class="input-group">
-                                    <input type="number" id="incrementoAlquiler" class="form-input with-suffix" value="2" min="0" max="10" step="0.1">
-                                    <span class="input-suffix">%</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Años de análisis</label>
-                                <input type="number" id="anosAnalisis" class="form-input" value="20" min="1" max="40" step="1">
-                            </div>
-                        </div>
-
-                        <!-- Tab: Gastos -->
-                        <div class="tab-content" id="gastos-tab">
-                            <div class="form-group">
-                                <label class="form-label">IBI anual</label>
-                                <div class="input-group">
-                                    <input type="number" id="ibi" class="form-input with-suffix" value="500" min="0" step="50">
-                                    <span class="input-suffix">€/año</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Gastos de comunidad</label>
-                                <div class="input-group">
-                                    <input type="number" id="comunidad" class="form-input with-suffix" value="80" min="0" step="10">
-                                    <span class="input-suffix">€/mes</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Seguro de hogar</label>
-                                <div class="input-group">
-                                    <input type="number" id="seguro" class="form-input with-suffix" value="300" min="0" step="50">
-                                    <span class="input-suffix">€/año</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Mantenimiento y reparaciones</label>
-                                <div class="input-group">
-                                    <input type="number" id="mantenimiento" class="form-input with-suffix" value="500" min="0" step="50">
-                                    <span class="input-suffix">€/año</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Administración/Gestión</label>
-                                <div class="input-group">
-                                    <input type="number" id="administracion" class="form-input with-suffix" value="60" min="0" step="10">
-                                    <span class="input-suffix">€/mes</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Incremento anual de gastos</label>
-                                <div class="input-group">
-                                    <input type="number" id="incrementoGastos" class="form-input with-suffix" value="0" min="0" max="10" step="0.1">
-                                    <span class="input-suffix">%</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Tasa impositiva sobre alquiler neto</label>
-                                <div class="input-group">
-                                    <input type="number" id="taxAlquiler" class="form-input with-suffix" value="21" min="0" max="47" step="0.1">
-                                    <span class="input-suffix">%</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tab: Revalorización -->
-                        <div class="tab-content" id="revalorizacion-tab">
-                            <div class="form-group">
-                                <label class="form-label">Revalorización anual del inmueble</label>
-                                <div class="input-group">
-                                    <input type="number" id="revalorizacion" class="form-input with-suffix" value="2.5" min="-5" max="15" step="0.1">
-                                    <span class="input-suffix">%</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Gastos de venta futura</label>
-                                <div class="input-group">
-                                    <input type="number" id="gastosVenta" class="form-input with-suffix" value="8" min="0" max="15" step="0.1">
-                                    <span class="input-suffix">%</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Impuesto plusvalía municipal</label>
-                                <div class="input-group">
-                                    <input type="number" id="plusvalia" class="form-input with-suffix" value="2000" min="0" step="100">
-                                    <span class="input-suffix">€</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">IRPF por venta (19-23%)</label>
-                                <div class="input-group">
-                                    <input type="number" id="irpfVenta" class="form-input with-suffix" value="19" min="0" max="47" step="0.1">
-                                    <span class="input-suffix">%</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- BOTÓN DE CALCULAR -->
-                        <button class="btn btn-primary btn-block" id="calcularBtn">
-                            🧮 Analizar Inversión
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Panel de Resultados -->
-                <div class="glass-card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            📊 Análisis de Rentabilidad
-                        </div>
-                        <div class="card-subtitle">Resultados completos de tu inversión a largo plazo</div>
-                    </div>
-                    <div class="card-body">
-                        <div id="resultados">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">📈</div>
-                                <h3>¡Analiza tu inversión inmobiliaria!</h3>
-                                <p>Completa los datos en el panel izquierdo y haz clic en "Analizar Inversión" para obtener un análisis detallado de rentabilidad con proyección a largo plazo.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Resumen flotante -->
-        <div class="floating-summary" id="floatingSummary">
-            <div style="font-weight: 600; margin-bottom: 0.5rem;">Rentabilidad por flujo</div>
-            <div id="floatingValue" style="font-size: 1.6rem; font-weight: 800;">-</div>
-        </div>
+<div class="bg-particles" id="particles"></div>
+<div class="app-container">
+<header class="header">
+    <div class="language-selector">
+        <select id="langSelector">
+            <option value="es">🇪🇸 Español</option>
+            <option value="en">🇬🇧 English</option>
+        </select>
     </div>
-    <script>
+    <h1 data-i18n="calculadora_inversion">🏠 Calculadora de Inversión Inmobiliaria</h1>
+    <p data-i18n="analisis_completo">Análisis completo para inversión en alquiler - España</p>
+</header>
+<main class="main-content">
+<div class="content-grid">
+<!-- Panel de Configuración -->
+<div class="glass-card">
+<div class="card-header">
+<div class="card-title"><span data-i18n="configuracion_inversion">⚙️ Configuración de Inversión</span></div>
+<div class="card-subtitle"><span data-i18n="personaliza_parametros">Personaliza todos los parámetros de tu análisis</span></div>
+</div>
+<div class="card-body">
+<!-- Selector de Escenarios -->
+<div class="scenario-selector">
+<button class="scenario-btn active" data-scenario="conservador"><span data-i18n="conservador">🛡️ Conservador</span></button>
+<button class="scenario-btn" data-scenario="moderado"><span data-i18n="moderado">⚖️ Moderado</span></button>
+<button class="scenario-btn" data-scenario="optimista"><span data-i18n="optimista">🚀 Optimista</span></button>
+</div>
+<div class="nav-tabs">
+<button class="nav-tab active" data-tab="propiedad"><span data-i18n="propiedad">🏠 Propiedad</span></button>
+<button class="nav-tab" data-tab="financiacion"><span data-i18n="financiacion">💰 Financiación</span></button>
+<button class="nav-tab" data-tab="ingresos"><span data-i18n="ingresos">📈 Ingresos</span></button>
+<button class="nav-tab" data-tab="gastos"><span data-i18n="gastos">📊 Gastos</span></button>
+<button class="nav-tab" data-tab="revalorizacion"><span data-i18n="revalorizacion">💎 Revalorización</span></button>
+</div>
+<!-- Tab: Propiedad -->
+<div class="tab-content active" id="propiedad-tab">
+<div class="form-group">
+<label class="form-label" data-i18n="precio_compra">Precio de compra</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="precio" min="0" step="1000" type="number" value="140000"/>
+<span class="input-suffix">€</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="tipo_vivienda">Tipo de vivienda</label>
+<select class="form-select" id="tipoVivienda">
+<option value="segunda" data-i18n="segunda_vivienda">Segunda vivienda (10% ITP)</option>
+<option value="nueva" data-i18n="vivienda_nueva">Vivienda nueva (10% IVA + 1.2% AJD)</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="gastos_compra">Gastos de compra-venta</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="gastosCompra" min="0" step="100" type="number" value="3500"/>
+<span class="input-suffix">€</span>
+</div>
+</div>
+</div>
+<!-- Tab: Financiación -->
+<div class="tab-content" id="financiacion-tab">
+<div class="form-group">
+<label class="form-label" data-i18n="tipo_financiacion">Tipo de financiación</label>
+<select class="form-select" id="financiacionTipo">
+<option value="con_hipoteca" data-i18n="con_hipoteca">Con hipoteca</option>
+<option value="sin_hipoteca" data-i18n="sin_hipoteca">Sin hipoteca</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="porcentaje_entrada">Porcentaje de entrada</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="entrada" max="100" min="0" step="1" type="number" value="20"/>
+<span class="input-suffix">%</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="interes_hipoteca">Tipo de interés hipoteca</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="interes" max="15" min="0" step="0.1" type="number" value="2.5"/>
+<span class="input-suffix">%</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="anos_hipoteca">Años de hipoteca</label>
+<input class="form-input" id="anos" max="40" min="5" step="1" type="number" value="25"/>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="gastos_hipoteca">Gastos de hipoteca</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="gastosHipoteca" min="0" step="100" type="number" value="2500"/>
+<span class="input-suffix">€</span>
+</div>
+</div>
+</div>
+<!-- Tab: Ingresos -->
+<div class="tab-content" id="ingresos-tab">
+<div class="form-group">
+<label class="form-label" data-i18n="alquiler_mensual">Alquiler mensual</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="alquiler" min="0" step="50" type="number" value="800"/>
+<span class="input-suffix" data-i18n="mes">€/mes</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="meses_vacios">Meses vacío al año</label>
+<input class="form-input" id="mesesVacio" max="12" min="0" step="0.5" type="number" value="1"/>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="incremento_alquiler">Incremento anual del alquiler</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="incrementoAlquiler" max="10" min="0" step="0.1" type="number" value="2"/>
+<span class="input-suffix">%</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="anos_analisis">Años de análisis</label>
+<input class="form-input" id="anosAnalisis" max="40" min="1" step="1" type="number" value="20"/>
+</div>
+</div>
+<!-- Tab: Gastos -->
+<div class="tab-content" id="gastos-tab">
+<div class="form-group">
+<label class="form-label" data-i18n="ibi_anual">IBI anual</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="ibi" min="0" step="50" type="number" value="500"/>
+<span class="input-suffix" data-i18n="ano">€/año</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="gastos_comunidad">Gastos de comunidad</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="comunidad" min="0" step="10" type="number" value="80"/>
+<span class="input-suffix" data-i18n="mes">€/mes</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="seguro_hogar">Seguro de hogar</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="seguro" min="0" step="50" type="number" value="300"/>
+<span class="input-suffix" data-i18n="ano">€/año</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="mantenimiento">Mantenimiento y reparaciones</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="mantenimiento" min="0" step="50" type="number" value="500"/>
+<span class="input-suffix" data-i18n="ano">€/año</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="administracion">Administración/Gestión</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="administracion" min="0" step="10" type="number" value="60"/>
+<span class="input-suffix" data-i18n="mes">€/mes</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="incremento_gastos">Incremento anual de gastos</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="incrementoGastos" max="10" min="0" step="0.1" type="number" value="0"/>
+<span class="input-suffix">%</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="tasa_impositiva">Tasa impositiva sobre alquiler neto</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="taxAlquiler" max="47" min="0" step="0.1" type="number" value="21"/>
+<span class="input-suffix">%</span>
+</div>
+</div>
+</div>
+<!-- Tab: Revalorización -->
+<div class="tab-content" id="revalorizacion-tab">
+<div class="form-group">
+<label class="form-label" data-i18n="revalorizacion_anual">Revalorización anual del inmueble</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="revalorizacion" max="15" min="-5" step="0.1" type="number" value="2.5"/>
+<span class="input-suffix">%</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="gastos_venta">Gastos de venta futura</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="gastosVenta" max="15" min="0" step="0.1" type="number" value="8"/>
+<span class="input-suffix">%</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="plusvalia">Impuesto plusvalía municipal</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="plusvalia" min="0" step="100" type="number" value="2000"/>
+<span class="input-suffix">€</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" data-i18n="irpf_venta">IRPF por venta (19-23%)</label>
+<div class="input-group">
+<input class="form-input with-suffix" id="irpfVenta" max="47" min="0" step="0.1" type="number" value="19"/>
+<span class="input-suffix">%</span>
+</div>
+</div>
+</div>
+<!-- BOTÓN DE CALCULAR -->
+<button class="btn btn-primary btn-block" id="calcularBtn"><span data-i18n="analizar_inversion">🧮 Analizar Inversión</span></button>
+</div>
+</div>
+<!-- Panel de Resultados -->
+<div class="glass-card">
+<div class="card-header">
+<div class="card-title"><span data-i18n="analisis_rentabilidad">📊 Análisis de Rentabilidad</span></div>
+<div class="card-subtitle"><span data-i18n="resultados_completos">Resultados completos de tu inversión a largo plazo</span></div>
+</div>
+<div class="card-body">
+<div id="resultados">
+<div class="empty-state">
+<div class="empty-state-icon">📈</div>
+<h3 data-i18n="analiza_inversion">¡Analiza tu inversión inmobiliaria!</h3>
+<p data-i18n="completa_datos">Completa los datos en el panel izquierdo y haz clic en "Analizar Inversión" para obtener un análisis detallado de rentabilidad con proyección a largo plazo.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Resumen flotante -->
+<div class="floating-summary" id="floatingSummary">
+<div style="font-weight: 600; margin-bottom: 0.5rem;" data-i18n="rentabilidad_flujo">Rentabilidad por flujo</div>
+<div id="floatingValue" style="font-size: 1.6rem; font-weight: 800;">-</div>
+</div>
+</div>
+<script>
         // Variables globales
         const scenarios = {
             conservador: {
@@ -883,6 +875,255 @@
                 taxAlquiler: 21
             }
         };
+
+        // Sistema de traducción
+        const translations = {
+            es: {
+                calculadora_inversion: "🏠 Calculadora de Inversión Inmobiliaria",
+                analisis_completo: "Análisis completo para inversión en alquiler - España",
+                configuracion_inversion: "⚙️ Configuración de Inversión",
+                personaliza_parametros: "Personaliza todos los parámetros de tu análisis",
+                conservador: "🛡️ Conservador",
+                moderado: "⚖️ Moderado",
+                optimista: "🚀 Optimista",
+                propiedad: "🏠 Propiedad",
+                financiacion: "💰 Financiación",
+                ingresos: "📈 Ingresos",
+                gastos: "📊 Gastos",
+                revalorizacion: "💎 Revalorización",
+                precio_compra: "Precio de compra",
+                tipo_vivienda: "Tipo de vivienda",
+                segunda_vivienda: "Segunda vivienda (10% ITP)",
+                vivienda_nueva: "Vivienda nueva (10% IVA + 1.2% AJD)",
+                gastos_compra: "Gastos de compra-venta",
+                tipo_financiacion: "Tipo de financiación",
+                con_hipoteca: "Con hipoteca",
+                sin_hipoteca: "Sin hipoteca",
+                porcentaje_entrada: "Porcentaje de entrada",
+                interes_hipoteca: "Tipo de interés hipoteca",
+                anos_hipoteca: "Años de hipoteca",
+                gastos_hipoteca: "Gastos de hipoteca",
+                alquiler_mensual: "Alquiler mensual",
+                meses_vacios: "Meses vacío al año",
+                incremento_alquiler: "Incremento anual del alquiler",
+                anos_analisis: "Años de análisis",
+                ibi_anual: "IBI anual",
+                gastos_comunidad: "Gastos de comunidad",
+                seguro_hogar: "Seguro de hogar",
+                mantenimiento: "Mantenimiento y reparaciones",
+                administracion: "Administración/Gestión",
+                incremento_gastos: "Incremento anual de gastos",
+                tasa_impositiva: "Tasa impositiva sobre alquiler neto",
+                revalorizacion_anual: "Revalorización anual del inmueble",
+                gastos_venta: "Gastos de venta futura",
+                plusvalia: "Impuesto plusvalía municipal",
+                irpf_venta: "IRPF por venta (19-23%)",
+                analizar_inversion: "🧮 Analizar Inversión",
+                analisis_rentabilidad: "📊 Análisis de Rentabilidad",
+                resultados_completos: "Resultados completos de tu inversión a largo plazo",
+                analiza_inversion: "¡Analiza tu inversión inmobiliaria!",
+                completa_datos: "Completa los datos en el panel izquierdo y haz clic en \"Analizar Inversión\" para obtener un análisis detallado de rentabilidad con proyección a largo plazo.",
+                rentabilidad_flujo: "Rentabilidad por flujo",
+                mes: "€/mes",
+                ano: "€/año",
+                inversion_inicial: "Inversión Inicial",
+                flujo_mensual: "Flujo Mensual",
+                tir_anualizada: "TIR Anualizada",
+                beneficio_total: "Beneficio Total",
+                valor_final: "Valor Final",
+                flujo_acumulado: "Flujo Acumulado",
+                capital_necesario: "Capital necesario para empezar",
+                cashflow_mensual_neto: "Cashflow mensual neto (Año 1)",
+                rentabilidad_anual_compuesta: "Rentabilidad anual compuesta",
+                en_anos: "años",
+                solo_por_alquileres: "Solo por alquileres",
+                desglose_inversion: "💰 Desglose de Inversión Inicial",
+                entrada_porcentaje: "Entrada",
+                impuestos_itp: "Impuestos (ITP/IVA+AJD)",
+                gastos_compra_text: "Gastos de compra",
+                gastos_hipoteca_text: "Gastos de hipoteca",
+                total_inversion: "TOTAL INVERSIÓN",
+                cashflow_mensual: "📊 Cashflow Mensual (Año 1)",
+                ingresos_alquiler: "Ingresos por Alquiler",
+                cuota_hipoteca: "Cuota Hipoteca",
+                comunidad_text: "Gastos de Comunidad",
+                ibi_mensual: "IBI (mensual)",
+                seguro_mensual: "Seguro de hogar (mensual)",
+                mantenimiento_mensual: "Mantenimiento (mensual)",
+                administracion_text: "Administración",
+                impuestos_alquiler: "Impuestos sobre alquiler (mensualizado)",
+                net_cashflow: "NET CASHFLOW",
+                proyeccion_venta: "🏠 Proyección de Venta (Año",
+                valor_estimado: "Valor Estimado del Inmueble",
+                gastos_venta_porcentaje: "Gastos de Venta",
+                plusvalia_municipal: "Plusvalía Municipal",
+                irpf_ganancia: "IRPF Ganancia Capital",
+                valor_neto_venta: "VALOR NETO DE VENTA",
+                comparacion_inversiones: "📊 Comparación con Otras Inversiones",
+                tu_inversion: "Tu Inversión",
+                deposito_bancario: "Depósito Bancario",
+                bonos_espana: "Bonos España",
+                fondos_mixtos: "Fondos Mixtos",
+                reits: "REITs",
+                sp500: "S&P 500",
+                proyecciones_ano: "📅 Proyecciones Año por Año",
+                ano_header: "Año",
+                ingresos_alquiler_header: "Ingresos Alquiler",
+                gastos_header: "Gastos",
+                hipoteca_header: "Hipoteca",
+                impuestos_header: "Impuestos",
+                flujo_caja: "Flujo de Caja",
+                rentabilidad_flujo_header: "Rentabilidad Flujo (%)",
+                valor_inmueble: "Valor Inmueble",
+                prestamo_restante: "Préstamo Restante",
+                neto_si_vende: "Neto si Vende",
+                beneficio_acumulado: "Beneficio Acumulado",
+                error_calculo: "Error: Ha ocurrido un problema en el cálculo. Verifica los valores introducidos.",
+                error_tecnico: "Error técnico:",
+                rentabilidad_moderada: "Rentabilidad Moderada: Con un",
+                anual_considera: "% anual, considera alternativas como fondos indexados o REITs.",
+                cashflow_negativo: "Cashflow Negativo: Necesitarás aportar",
+                mensuales_adicionales: "€ mensuales adicionales.",
+                excelente_rentabilidad: "Excelente Rentabilidad: Esta inversión supera significativamente la media del mercado inmobiliario español (4-6% anual)."
+            },
+            en: {
+                calculadora_inversion: "🏠 Real Estate Investment Calculator",
+                analisis_completo: "Complete analysis for rental investment - Spain",
+                configuracion_inversion: "⚙️ Investment Configuration",
+                personaliza_parametros: "Customize all parameters of your analysis",
+                conservador: "🛡️ Conservative",
+                moderado: "⚖️ Moderate",
+                optimista: "🚀 Optimistic",
+                propiedad: "🏠 Property",
+                financiacion: "💰 Financing",
+                ingresos: "📈 Income",
+                gastos: "📊 Expenses",
+                revalorizacion: "💎 Appreciation",
+                precio_compra: "Purchase price",
+                tipo_vivienda: "Property type",
+                segunda_vivienda: "Second home (10% Transfer Tax)",
+                vivienda_nueva: "New home (10% VAT + 1.2% Stamp Duty)",
+                gastos_compra: "Purchase expenses",
+                tipo_financiacion: "Financing type",
+                con_hipoteca: "With mortgage",
+                sin_hipoteca: "Without mortgage",
+                porcentaje_entrada: "Down payment percentage",
+                interes_hipoteca: "Mortgage interest rate",
+                anos_hipoteca: "Mortgage term (years)",
+                gastos_hipoteca: "Mortgage expenses",
+                alquiler_mensual: "Monthly rent",
+                meses_vacios: "Vacant months per year",
+                incremento_alquiler: "Annual rent increase",
+                anos_analisis: "Analysis period (years)",
+                ibi_anual: "Annual property tax (IBI)",
+                gastos_comunidad: "Community fees",
+                seguro_hogar: "Home insurance",
+                mantenimiento: "Maintenance and repairs",
+                administracion: "Administration/Management",
+                incremento_gastos: "Annual expense increase",
+                tasa_impositiva: "Tax rate on net rental income",
+                revalorizacion_anual: "Annual property appreciation",
+                gastos_venta: "Future sale expenses",
+                plusvalia: "Municipal capital gains tax",
+                irpf_venta: "Income tax on sale (19-23%)",
+                analizar_inversion: "🧮 Analyze Investment",
+                analisis_rentabilidad: "📊 Profitability Analysis",
+                resultados_completos: "Complete results of your long-term investment",
+                analiza_inversion: "Analyze your real estate investment!",
+                completa_datos: "Complete the data in the left panel and click \"Analyze Investment\" to get a detailed profitability analysis with long-term projection.",
+                rentabilidad_flujo: "Cashflow Return",
+                mes: "€/month",
+                ano: "€/year",
+                inversion_inicial: "Initial Investment",
+                flujo_mensual: "Monthly Cashflow",
+                tir_anualizada: "Annualized IRR",
+                beneficio_total: "Total Profit",
+                valor_final: "Final Value",
+                flujo_acumulado: "Accumulated Cashflow",
+                capital_necesario: "Capital needed to start",
+                cashflow_mensual_neto: "Net monthly cashflow (Year 1)",
+                rentabilidad_anual_compuesta: "Compound annual return",
+                en_anos: "years",
+                solo_por_alquileres: "From rentals only",
+                desglose_inversion: "💰 Initial Investment Breakdown",
+                entrada_porcentaje: "Down payment",
+                impuestos_itp: "Taxes (Transfer Tax/VAT+Stamp Duty)",
+                gastos_compra_text: "Purchase expenses",
+                gastos_hipoteca_text: "Mortgage expenses",
+                total_inversion: "TOTAL INVESTMENT",
+                cashflow_mensual: "📊 Monthly Cashflow (Year 1)",
+                ingresos_alquiler: "Rental Income",
+                cuota_hipoteca: "Mortgage Payment",
+                comunidad_text: "Community Fees",
+                ibi_mensual: "Property Tax (monthly)",
+                seguro_mensual: "Home Insurance (monthly)",
+                mantenimiento_mensual: "Maintenance (monthly)",
+                administracion_text: "Administration",
+                impuestos_alquiler: "Rental taxes (monthly)",
+                net_cashflow: "NET CASHFLOW",
+                proyeccion_venta: "🏠 Sale Projection (Year",
+                valor_estimado: "Estimated Property Value",
+                gastos_venta_porcentaje: "Sale Expenses",
+                plusvalia_municipal: "Municipal Capital Gains Tax",
+                irpf_ganancia: "Income Tax on Capital Gains",
+                valor_neto_venta: "NET SALE VALUE",
+                comparacion_inversiones: "📊 Comparison with Other Investments",
+                tu_inversion: "Your Investment",
+                deposito_bancario: "Bank Deposit",
+                bonos_espana: "Spanish Bonds",
+                fondos_mixtos: "Mixed Funds",
+                reits: "REITs",
+                sp500: "S&P 500",
+                proyecciones_ano: "📅 Year-by-Year Projections",
+                ano_header: "Year",
+                ingresos_alquiler_header: "Rental Income",
+                gastos_header: "Expenses",
+                hipoteca_header: "Mortgage",
+                impuestos_header: "Taxes",
+                flujo_caja: "Cash Flow",
+                rentabilidad_flujo_header: "Cash Return (%)",
+                valor_inmueble: "Property Value",
+                prestamo_restante: "Remaining Loan",
+                neto_si_vende: "Net if Sold",
+                beneficio_acumulado: "Accumulated Profit",
+                error_calculo: "Error: A problem occurred in the calculation. Please verify the entered values.",
+                error_tecnico: "Technical error:",
+                rentabilidad_moderada: "Moderate Profitability: With",
+                anual_considera: "% annual return, consider alternatives like index funds or REITs.",
+                cashflow_negativo: "Negative Cashflow: You will need to contribute an additional",
+                mensuales_adicionales: "€ monthly.",
+                excelente_rentabilidad: "Excellent Profitability: This investment significantly exceeds the average Spanish real estate market return (4-6% annually)."
+            }
+        };
+
+        let currentLanguage = 'es';
+
+        // Función para cambiar el idioma
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.documentElement.lang = lang;
+            
+            // Actualizar todos los textos con data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Actualizar opciones de select
+            document.querySelectorAll('option[data-i18n]').forEach(option => {
+                const key = option.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    option.textContent = translations[lang][key];
+                }
+            });
+            
+            // Si hay resultados, recalcular para actualizar el texto
+            if (document.getElementById('resultados').innerHTML.indexOf('empty-state') === -1) {
+                calcular();
+            }
+        }
 
         // Crear partículas de fondo
         function createParticles() {
@@ -1037,13 +1278,19 @@
 
                 // Validaciones
                 if (anosAnalisis < 1) {
-                    throw new Error('Los años de análisis deben ser mayores a 0.');
+                    throw new Error(currentLanguage === 'es' ? 
+                        'Los años de análisis deben ser mayores a 0.' : 
+                        'Analysis period must be greater than 0 years.');
                 }
                 if (financiacionTipo === 'con_hipoteca' && anos < 1) {
-                    throw new Error('Los años de hipoteca deben ser mayores a 0.');
+                    throw new Error(currentLanguage === 'es' ? 
+                        'Los años de hipoteca deben ser mayores a 0.' : 
+                        'Mortgage term must be greater than 0 years.');
                 }
                 if (mesesVacio > 12) {
-                    throw new Error('Los meses vacíos no pueden superar los 12 meses.');
+                    throw new Error(currentLanguage === 'es' ? 
+                        'Los meses vacíos no pueden superar los 12 meses.' : 
+                        'Vacant months cannot exceed 12 months.');
                 }
 
                 // Cálculos básicos
@@ -1111,8 +1358,8 @@
                     const gananciaCapital = Math.max(0, precioVentaBruto - precio);
                     const impuestosGanancias = gananciaCapital * (irpfVenta / 100);
                     const precioVentaNeto = precioVentaBruto - gastosVentaEuros - plusvalia - impuestosGanancias;
-                    const beneficioVenta = precioVentaNeto - saldoPendiente;
-                    const beneficioAcumulado = flujoAcumulado + flujoAnual + beneficioVenta - inversionInicial;
+                    const beneficioVenda = precioVentaNeto - saldoPendiente;
+                    const beneficioAcumulado = flujoAcumulado + flujoAnual + beneficioVenda - inversionInicial;
 
                     proyecciones.push({
                         year,
@@ -1191,8 +1438,8 @@
                 console.error('Error en cálculo:', error);
                 document.getElementById('resultados').innerHTML = `
                     <div class="alert alert-danger">
-                        ⚠️ <strong>Error:</strong> Ha ocurrido un problema en el cálculo. Verifica los valores introducidos.
-                        <br><small>Error técnico: ${error.message}</small>
+                        ⚠️ <strong>${translations[currentLanguage].error_calculo}</strong>
+                        <br><small>${translations[currentLanguage].error_tecnico} ${error.message}</small>
                     </div>
                 `;
             }
@@ -1219,17 +1466,17 @@
                     <table class="projection-table">
                         <thead>
                             <tr>
-                                <th>Año</th>
-                                <th>Ingresos Alquiler</th>
-                                <th>Gastos</th>
-                                <th>Hipoteca</th>
-                                <th>Impuestos</th>
-                                <th>Flujo de Caja</th>
-                                <th>Rentabilidad Flujo (%)</th>
-                                <th>Valor Inmueble</th>
-                                <th>Préstamo Restante</th>
-                                <th>Neto si Vende</th>
-                                <th>Beneficio Acumulado</th>
+                                <th>${translations[currentLanguage].ano_header}</th>
+                                <th>${translations[currentLanguage].ingresos_alquiler_header}</th>
+                                <th>${translations[currentLanguage].gastos_header}</th>
+                                <th>${translations[currentLanguage].hipoteca_header}</th>
+                                <th>${translations[currentLanguage].impuestos_header}</th>
+                                <th>${translations[currentLanguage].flujo_caja}</th>
+                                <th>${translations[currentLanguage].rentabilidad_flujo_header}</th>
+                                <th>${translations[currentLanguage].valor_inmueble}</th>
+                                <th>${translations[currentLanguage].prestamo_restante}</th>
+                                <th>${translations[currentLanguage].neto_si_vende}</th>
+                                <th>${translations[currentLanguage].beneficio_acumulado}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1238,16 +1485,16 @@
                 tablaProyecciones += `
                     <tr>
                         <td>${proy.year}</td>
-                        <td class="metric-positive">+${proy.ingresosAlquiler.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
-                        <td class="metric-negative">-${(proy.gastosFijos - proy.cuotaHipoteca).toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
-                        <td class="metric-negative">-${proy.cuotaHipoteca.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
-                        <td class="metric-negative">-${proy.tax.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
-                        <td class="${proy.flujoAnual >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.flujoAnual.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td class="metric-positive">+${proy.ingresosAlquiler.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</td>
+                        <td class="metric-negative">-${(proy.gastosFijos - proy.cuotaHipoteca).toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</td>
+                        <td class="metric-negative">-${proy.cuotaHipoteca.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</td>
+                        <td class="metric-negative">-${proy.tax.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</td>
+                        <td class="${proy.flujoAnual >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.flujoAnual.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</td>
                         <td class="${proy.rentabilidadFlujo >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.rentabilidadFlujo.toFixed(2)}%</td>
-                        <td>${proy.valorVivienda.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
-                        <td>${proy.saldoPendiente.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
-                        <td class="metric-info">${proy.precioVentaNeto.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
-                        <td class="${proy.beneficioAcumulado >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.beneficioAcumulado.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</td>
+                        <td>${proy.valorVivienda.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</td>
+                        <td>${proy.saldoPendiente.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</td>
+                        <td class="metric-info">${proy.precioVentaNeto.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</td>
+                        <td class="${proy.beneficioAcumulado >= 0 ? 'metric-positive' : 'metric-negative'}">${proy.beneficioAcumulado.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</td>
                     </tr>
                 `;
             });
@@ -1261,102 +1508,102 @@
                 <div class="results-grid">
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div class="metric-title">Inversión Inicial</div>
+                            <div class="metric-title">${translations[currentLanguage].inversion_inicial}</div>
                             <div class="metric-icon">💰</div>
                         </div>
-                        <div class="metric-value">${datos.inversionInicial.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</div>
-                        <div class="metric-subtitle">Capital necesario para empezar</div>
+                        <div class="metric-value">${datos.inversionInicial.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</div>
+                        <div class="metric-subtitle">${translations[currentLanguage].capital_necesario}</div>
                     </div>
 
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div class="metric-title">Flujo Mensual</div>
+                            <div class="metric-title">${translations[currentLanguage].flujo_mensual}</div>
                             <div class="metric-icon">${datos.flujoMensual >= 0 ? '📈' : '📉'}</div>
                         </div>
-                        <div class="metric-value ${flujoClass}">${datos.flujoMensual.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</div>
-                        <div class="metric-subtitle">Cashflow mensual neto (Año 1)</div>
+                        <div class="metric-value ${flujoClass}">${datos.flujoMensual.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</div>
+                        <div class="metric-subtitle">${translations[currentLanguage].cashflow_mensual_neto}</div>
                     </div>
 
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div class="metric-title">TIR Anualizada</div>
+                            <div class="metric-title">${translations[currentLanguage].tir_anualizada}</div>
                             <div class="metric-icon">⚡</div>
                         </div>
                         <div class="metric-value ${rentabilidadClass}">${datos.rentabilidadAnual.toFixed(2)}%</div>
-                        <div class="metric-subtitle">Rentabilidad anual compuesta</div>
+                        <div class="metric-subtitle">${translations[currentLanguage].rentabilidad_anual_compuesta}</div>
                     </div>
 
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div class="metric-title">Beneficio Total</div>
+                            <div class="metric-title">${translations[currentLanguage].beneficio_total}</div>
                             <div class="metric-icon">${datos.beneficioTotal >= 0 ? '🎯' : '⚠️'}</div>
                         </div>
-                        <div class="metric-value ${beneficioClass}">${datos.beneficioTotal.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</div>
-                        <div class="metric-subtitle">En ${datos.anosAnalisis} años</div>
+                        <div class="metric-value ${beneficioClass}">${datos.beneficioTotal.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</div>
+                        <div class="metric-subtitle">${translations[currentLanguage].en_anos} ${datos.anosAnalisis}</div>
                     </div>
 
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div class="metric-title">Valor Final</div>
+                            <div class="metric-title">${translations[currentLanguage].valor_final}</div>
                             <div class="metric-icon">🏠</div>
                         </div>
-                        <div class="metric-value metric-info">${datos.precioVentaNeto.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</div>
-                        <div class="metric-subtitle">Precio venta estimado</div>
+                        <div class="metric-value metric-info">${datos.precioVentaNeto.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</div>
+                        <div class="metric-subtitle">${currentLanguage === 'es' ? 'Precio venta estimado' : 'Estimated sale price'}</div>
                     </div>
 
                     <div class="metric-card">
                         <div class="metric-header">
-                            <div class="metric-title">Flujo Acumulado</div>
+                            <div class="metric-title">${translations[currentLanguage].flujo_acumulado}</div>
                             <div class="metric-icon">💎</div>
                         </div>
-                        <div class="metric-value ${datos.flujoAcumulado >= 0 ? 'metric-positive' : 'metric-negative'}">${datos.flujoAcumulado.toLocaleString('es-ES', {maximumFractionDigits: 0})} €</div>
-                        <div class="metric-subtitle">Solo por alquileres</div>
+                        <div class="metric-value ${datos.flujoAcumulado >= 0 ? 'metric-positive' : 'metric-negative'}">${datos.flujoAcumulado.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', {maximumFractionDigits: 0})} €</div>
+                        <div class="metric-subtitle">${translations[currentLanguage].solo_por_alquileres}</div>
                     </div>
                 </div>
 
                 ${datos.rentabilidadAnual < 4 ? `
                 <div class="alert alert-warning">
-                    ⚠️ <strong>Rentabilidad Moderada:</strong> Con un ${datos.rentabilidadAnual.toFixed(2)}% anual, considera alternativas como fondos indexados o REITs.
+                    ⚠️ <strong>${translations[currentLanguage].rentabilidad_moderada}</strong> ${datos.rentabilidadAnual.toFixed(2)}${translations[currentLanguage].anual_considera}
                 </div>
                 ` : ''}
 
                 ${datos.flujoMensual < 0 ? `
                 <div class="alert alert-danger">
-                    🔴 <strong>Cashflow Negativo:</strong> Necesitarás aportar ${Math.abs(datos.flujoMensual).toLocaleString('es-ES')} € mensuales adicionales.
+                    🔴 <strong>${translations[currentLanguage].cashflow_negativo}</strong> ${Math.abs(datos.flujoMensual).toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')}${translations[currentLanguage].mensuales_adicionales}
                 </div>
                 ` : ''}
 
                 ${datos.rentabilidadAnual > 8 ? `
                 <div class="alert alert-info">
-                    🚀 <strong>Excelente Rentabilidad:</strong> Esta inversión supera significativamente la media del mercado inmobiliario español (4-6% anual).
+                    🚀 <strong>${translations[currentLanguage].excelente_rentabilidad}</strong>
                 </div>
                 ` : ''}
 
                 <!-- Desglose de Inversión Inicial -->
                 <div style="background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); margin: 2rem 0; border: 1px solid var(--border);">
                     <div style="background: linear-gradient(135deg, var(--light) 0%, #e2e8f0 100%); padding: 1.5rem 2rem; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 0.75rem; font-size: 1.1rem;">
-                        💰 Desglose de Inversión Inicial
+                        ${translations[currentLanguage].desglose_inversion}
                     </div>
                     <div style="padding: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Entrada (${datos.entrada}%)</span>
-                            <span style="font-weight: 700;">${datos.montoEntrada.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].entrada_porcentaje} (${datos.entrada}%)</span>
+                            <span style="font-weight: 700;">${datos.montoEntrada.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Impuestos (ITP/IVA+AJD)</span>
-                            <span style="font-weight: 700;">${datos.impuestos.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].impuestos_itp}</span>
+                            <span style="font-weight: 700;">${datos.impuestos.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Gastos de compra</span>
-                            <span style="font-weight: 700;">${datos.gastosCompra.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].gastos_compra_text}</span>
+                            <span style="font-weight: 700;">${datos.gastosCompra.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Gastos de hipoteca</span>
-                            <span style="font-weight: 700;">${datos.gastosHipoteca.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].gastos_hipoteca_text}</span>
+                            <span style="font-weight: 700;">${datos.gastosHipoteca.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; background: var(--light); font-weight: 700; color: var(--dark);">
-                            <span><strong>TOTAL INVERSIÓN</strong></span>
-                            <span><strong>${datos.inversionInicial.toLocaleString('es-ES')} €</strong></span>
+                            <span><strong>${translations[currentLanguage].total_inversion}</strong></span>
+                            <span><strong>${datos.inversionInicial.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</strong></span>
                         </div>
                     </div>
                 </div>
@@ -1364,44 +1611,44 @@
                 <!-- Desglose Mensual Año 1 -->
                 <div style="background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); margin: 2rem 0; border: 1px solid var(--border);">
                     <div style="background: linear-gradient(135deg, var(--light) 0%, #e2e8f0 100%); padding: 1.5rem 2rem; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 0.75rem; font-size: 1.1rem;">
-                        📊 Cashflow Mensual (Año 1)
+                        ${translations[currentLanguage].cashflow_mensual}
                     </div>
                     <div style="padding: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Ingresos por Alquiler</span>
-                            <span style="font-weight: 700; color: var(--success);">+${datos.ingresosMensuales.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].ingresos_alquiler}</span>
+                            <span style="font-weight: 700; color: var(--success);">+${datos.ingresosMensuales.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Cuota Hipoteca</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${datos.cuotaHipoteca.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].cuota_hipoteca}</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${datos.cuotaHipoteca.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Gastos de Comunidad</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${datos.comunidad.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].comunidad_text}</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${datos.comunidad.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">IBI (mensual)</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${(datos.ibi / 12).toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].ibi_mensual}</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${(datos.ibi / 12).toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Seguro de hogar (mensual)</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${(datos.seguro / 12).toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].seguro_mensual}</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${(datos.seguro / 12).toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Mantenimiento (mensual)</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${(datos.mantenimiento / 12).toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].mantenimiento_mensual}</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${(datos.mantenimiento / 12).toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Administración</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${datos.administracion.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].administracion_text}</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${datos.administracion.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Impuestos sobre alquiler (mensualizado)</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${datos.taxMensual.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].impuestos_alquiler}</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${datos.taxMensual.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; background: var(--light); font-weight: 700; color: var(--dark);">
-                            <span><strong>CASHFLOW NETO</strong></span>
-                            <span style="color: ${datos.flujoMensual >= 0 ? 'var(--success)' : 'var(--danger)'}"><strong>${datos.flujoMensual.toLocaleString('es-ES')} €</strong></span>
+                            <span><strong>${translations[currentLanguage].net_cashflow}</strong></span>
+                            <span style="color: ${datos.flujoMensual >= 0 ? 'var(--success)' : 'var(--danger)'}"><strong>${datos.flujoMensual.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</strong></span>
                         </div>
                     </div>
                 </div>
@@ -1409,28 +1656,28 @@
                 <!-- Proyección de Venta -->
                 <div style="background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); margin: 2rem 0; border: 1px solid var(--border);">
                     <div style="background: linear-gradient(135deg, var(--light) 0%, #e2e8f0 100%); padding: 1.5rem 2rem; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 0.75rem; font-size: 1.1rem;">
-                        🏠 Proyección de Venta (Año ${datos.anosAnalisis})
+                        ${translations[currentLanguage].proyeccion_venta} ${datos.anosAnalisis})
                     </div>
                     <div style="padding: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Valor Estimado del Inmueble</span>
-                            <span style="font-weight: 700;">${datos.precioVentaBruto.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].valor_estimado}</span>
+                            <span style="font-weight: 700;">${datos.precioVentaBruto.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Gastos de Venta (${getValue('gastosVenta', 8)}%)</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${datos.gastosVentaEuros.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].gastos_venta_porcentaje} (${getValue('gastosVenta', 8)}%)</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${datos.gastosVentaEuros.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">Plusvalía Municipal</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${datos.plusvalia.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].plusvalia_municipal}</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${datos.plusvalia.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); font-size: 1rem;">
-                            <span style="color: var(--text); font-weight: 500;">IRPF Ganancia Capital (${getValue('irpfVenta', 19)}%)</span>
-                            <span style="font-weight: 700; color: var(--danger);">-${datos.impuestosGanancias.toLocaleString('es-ES')} €</span>
+                            <span style="color: var(--text); font-weight: 500;">${translations[currentLanguage].irpf_ganancia} (${getValue('irpfVenta', 19)}%)</span>
+                            <span style="font-weight: 700; color: var(--danger);">-${datos.impuestosGanancias.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; background: var(--light); font-weight: 700; color: var(--dark);">
-                            <span><strong>VALOR NETO DE VENTA</strong></span>
-                            <span><strong>${datos.precioVentaNeto.toLocaleString('es-ES')} €</strong></span>
+                            <span><strong>${translations[currentLanguage].valor_neto_venta}</strong></span>
+                            <span><strong>${datos.precioVentaNeto.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US')} €</strong></span>
                         </div>
                     </div>
                 </div>
@@ -1438,41 +1685,43 @@
                 <!-- Comparación con Otras Inversiones -->
                 <div style="margin-top: 2rem;">
                     <h3 style="color: var(--dark); margin-bottom: 1.5rem; font-size: 1.3rem; display: flex; align-items: center; gap: 0.75rem;">
-                        📊 Comparación con Otras Inversiones
+                        ${translations[currentLanguage].comparacion_inversiones}
                     </h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                         <div style="background: var(--white); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border);">
-                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">Tu Inversión</div>
+                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">${translations[currentLanguage].tu_inversion}</div>
                             <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">${datos.rentabilidadAnual.toFixed(1)}%</div>
                         </div>
-                        <div style="background: var(--white); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border);">
-                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">Depósito Bancario</div>
-                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">3.2%</div>
+                        <div style="background: var(--white); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: var
                         </div>
                         <div style="background: var(--white); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border);">
-                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">Bonos España</div>
-                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">3.8%</div>
+                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">${translations[currentLanguage].deposito_bancario}</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text);">0.5%</div>
                         </div>
                         <div style="background: var(--white); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border);">
-                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">Fondos Mixtos</div>
-                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">5.5%</div>
+                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">${translations[currentLanguage].bonos_espana}</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text);">2.0%</div>
                         </div>
                         <div style="background: var(--white); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border);">
-                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">REITs</div>
-                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">7.2%</div>
+                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">${translations[currentLanguage].fondos_mixtos}</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text);">4.0%</div>
                         </div>
                         <div style="background: var(--white); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border);">
-                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">S&P 500</div>
-                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">10.5%</div>
+                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">${translations[currentLanguage].reits}</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text);">6.0%</div>
+                        </div>
+                        <div style="background: var(--white); border-radius: 16px; padding: 1.5rem; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border);">
+                            <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">${translations[currentLanguage].sp500}</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text);">8.0%</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Proyecciones Año por Año -->
-                <div style="background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); margin: 2rem 0; border: 1px solid var(--border);">
-                    <div style="background: linear-gradient(135deg, var(--light) 0%, #e2e8f0 100%); padding: 1.5rem 2rem; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 0.75rem; font-size: 1.1rem;">
-                        📅 Proyecciones Año por Año
-                    </div>
+                <div style="margin-top: 2rem;">
+                    <h3 style="color: var(--dark); margin-bottom: 1.5rem; font-size: 1.3rem; display: flex; align-items: center; gap: 0.75rem;">
+                        ${translations[currentLanguage].proyecciones_ano}
+                    </h3>
                     ${tablaProyecciones}
                 </div>
             `;
@@ -1481,57 +1730,60 @@
         // Actualizar resumen flotante
         function actualizarResumenFlotante(datos) {
             const floatingValue = document.getElementById('floatingValue');
-            if (!floatingValue) return;
-            
-            let color = 'rgba(245, 158, 11, 1)';
-            if (datos.rentabilidadAnual > 6) color = 'rgba(16, 185, 129, 1)';
-            else if (datos.rentabilidadAnual < 3) color = 'rgba(239, 68, 68, 1)';
-            
-            floatingValue.textContent = `${datos.rentabilidadAnual.toFixed(1)}%`;
-            floatingValue.style.color = color;
+            if (floatingValue) {
+                floatingValue.textContent = datos.rentabilidadAnual.toFixed(2) + '%';
+                floatingValue.className = datos.rentabilidadAnual > 6 ? 'metric-positive' : 
+                                       datos.rentabilidadAnual < 3 ? 'metric-negative' : 'metric-warning';
+            }
         }
 
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Inicializando aplicación...');
-            
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
             // Crear partículas
             createParticles();
             
-            // Configurar eventos para botones de escenario
+            // Cargar idioma por defecto
+            setLanguage('es');
+            
+            // Cargar escenario por defecto
+            loadScenario('moderado');
+            
+            // Event listener para cambio de idioma
+            document.getElementById('langSelector').addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+            });
+            
+            // Event listeners para botones de escenario
             document.querySelectorAll('.scenario-btn').forEach(btn => {
-                btn.addEventListener('click', () => loadScenario(btn.dataset.scenario));
+                btn.addEventListener('click', () => {
+                    loadScenario(btn.getAttribute('data-scenario'));
+                });
             });
-
-            // Configurar eventos para tabs
+            
+            // Event listeners para tabs
             document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+                tab.addEventListener('click', () => {
+                    switchTab(tab.getAttribute('data-tab'));
+                });
             });
-
-            // Configurar evento para el botón de calcular
-            const calcularBtn = document.getElementById('calcularBtn');
-            if (calcularBtn) {
-                calcularBtn.addEventListener('click', calcular);
-            }
-
-            // Configurar evento para cambio en tipo de financiación
-            const financiacionTipo = document.getElementById('financiacionTipo');
-            if (financiacionTipo) {
-                financiacionTipo.addEventListener('change', toggleFinanciacionInputs);
-            }
-
-            // Configurar eventos para inputs (recalcular al cambiar cualquier valor)
-            const inputs = document.querySelectorAll('.form-input, .form-select');
-            inputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    // Desmarcar escenarios predefinidos cuando se modifica cualquier input
+            
+            // Event listener para tipo de financiación
+            document.getElementById('financiacionTipo').addEventListener('change', toggleFinanciacionInputs);
+            
+            // Event listener para botón calcular
+            document.getElementById('calcularBtn').addEventListener('click', calcular);
+            
+            // Event listeners para inputs (recalcular al cambiar)
+            document.querySelectorAll('.form-input, .form-select').forEach(input => {
+                input.addEventListener('change', () => {
+                    // Desmarcar botones de escenario si se modifica algún input
                     document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
                     setTimeout(calcular, 100);
                 });
             });
-
-            // Cargar escenario moderado por defecto
-            loadScenario('moderado');
+            
+            // Calcular inicial
+            calcular();
         });
     </script>
 </body>
