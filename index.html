@@ -7,8 +7,14 @@
     <meta name="keywords" content="calculadora rentabilidad alquiler, inversión inmobiliaria españa, calcular ROI piso, TIR inmobiliaria, cashflow alquiler, ITP vivienda"/>
     <meta name="author" content="Calculadora Inversión Inmobiliaria"/>
     <meta property="og:title" content="Calculadora de Inversión Inmobiliaria | España"/>
-    <meta property="og:description" content="Analiza la rentabilidad de tu inversión en alquiler: TIR, ROI, cashflow y proyección a 20 años."/>
+    <meta property="og:description" content="Calcula GRATIS el cashflow, ROI y rentabilidad neta de tu inversión inmobiliaria en España."/>
     <meta property="og:type" content="website"/>
+    <meta property="og:image" content="https://tudominio.com/og-preview.jpg"/>
+    <meta property="og:url" content="https://tudominio.com"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Calculadora de Inversión Inmobiliaria | España"/>
+    <meta name="twitter:description" content="Calcula GRATIS el cashflow, ROI y rentabilidad neta de tu inversión inmobiliaria en España."/>
+    <meta name="twitter:image" content="https://tudominio.com/og-preview.jpg"/>
     <title>Calculadora de Inversión Inmobiliaria | Rentabilidad Alquiler España</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="style.css">
@@ -69,7 +75,7 @@
                         <div class="form-group">
                             <label class="form-label" data-i18n="precio_compra">Precio de compra</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="precio" min="0" step="1000" type="number" value="140000"/>
+                                <input class="form-input with-suffix" id="precio" min="0" step="1000" type="number" inputmode="decimal" value="140000"/>
                                 <span class="input-suffix">€</span>
                             </div>
                         </div>
@@ -80,17 +86,44 @@
                                 <option value="nueva" data-i18n="vivienda_nueva">Vivienda nueva (10% IVA + 1.2% AJD)</option>
                             </select>
                         </div>
+                        <div class="form-group" id="ccaaGroup">
+                            <label class="form-label" data-i18n="comunidad_autonoma">
+                                Comunidad Autónoma
+                                <span class="help-tooltip" title="El ITP varía por región. Selecciona la tuya para aplicar el tipo correcto automáticamente.">ℹ️</span>
+                            </label>
+                            <select class="form-select" id="ccaaSelector">
+                                <option value="" data-i18n="ccaa_selecciona">— Selecciona para ajustar el ITP —</option>
+                                <option value="6">Madrid (6%)</option>
+                                <option value="7">Andalucía (7%)</option>
+                                <option value="7">Aragón (7%)</option>
+                                <option value="7">Asturias (7%)</option>
+                                <option value="7">Baleares (7%)</option>
+                                <option value="6.5">Canarias (6.5%)</option>
+                                <option value="6">Cantabria (6%)</option>
+                                <option value="9">Castilla-La Mancha (9%)</option>
+                                <option value="8">Castilla y León (8%)</option>
+                                <option value="10">Cataluña (10%)</option>
+                                <option value="8">Extremadura (8%)</option>
+                                <option value="10">Galicia (10%)</option>
+                                <option value="6">La Rioja (6%)</option>
+                                <option value="6">Navarra (6%)</option>
+                                <option value="10">C. Valenciana (10%)</option>
+                                <option value="7">País Vasco (7%)</option>
+                                <option value="7">Murcia (7%)</option>
+                            </select>
+                            <div class="field-hint" id="itpHint" data-i18n="itp_hint_default">El ITP se calcula automáticamente según el tipo de vivienda (7% por defecto)</div>
+                        </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="gastos_compra">Gastos de compra-venta</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="gastosCompra" min="0" step="100" type="number" value="3500"/>
+                                <input class="form-input with-suffix" id="gastosCompra" min="0" step="100" type="number" inputmode="decimal" value="3500"/>
                                 <span class="input-suffix">€</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="gastos_reforma">Gastos de reforma</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="reforma" min="0" step="100" type="number" value="5000"/>
+                                <input class="form-input with-suffix" id="reforma" min="0" step="100" type="number" inputmode="decimal" value="5000"/>
                                 <span class="input-suffix">€</span>
                             </div>
                         </div>
@@ -108,7 +141,7 @@
                         <div class="form-group" id="entradaGroup">
                             <label class="form-label" data-i18n="ahorro_aportado">Ahorro aportado</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="entradaEuros" min="0" step="1000" type="number" value="28000"/>
+                                <input class="form-input with-suffix" id="entradaEuros" min="0" step="1000" type="number" inputmode="decimal" value="28000"/>
                                 <span class="input-suffix" id="entradaPorcentajeDisplay">20%</span>
                             </div>
                             <div class="slider-container">
@@ -118,18 +151,18 @@
                         <div class="form-group" id="interesGroup">
                             <label class="form-label" data-i18n="interes_hipoteca">Tipo de interés hipoteca</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="interes" max="15" min="0" step="0.1" type="number" value="2.5"/>
+                                <input class="form-input with-suffix" id="interes" max="15" min="0" step="0.1" type="number" inputmode="decimal" value="2.5"/>
                                 <span class="input-suffix">%</span>
                             </div>
                         </div>
                         <div class="form-group" id="anosGroup">
                             <label class="form-label" data-i18n="anos_hipoteca">Años de hipoteca</label>
-                            <input class="form-input" id="anos" max="40" min="5" step="1" type="number" value="25"/>
+                            <input class="form-input" id="anos" max="40" min="5" step="1" type="number" inputmode="decimal" value="25"/>
                         </div>
                         <div class="form-group" id="gastosHipGroup">
                             <label class="form-label" data-i18n="gastos_hipoteca">Gastos de hipoteca</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="gastosHipoteca" min="0" step="100" type="number" value="2500"/>
+                                <input class="form-input with-suffix" id="gastosHipoteca" min="0" step="100" type="number" inputmode="decimal" value="2500"/>
                                 <span class="input-suffix">€</span>
                             </div>
                         </div>
@@ -140,24 +173,24 @@
                         <div class="form-group">
                             <label class="form-label" data-i18n="alquiler_mensual">Alquiler mensual</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="alquiler" min="0" step="50" type="number" value="800"/>
+                                <input class="form-input with-suffix" id="alquiler" min="0" step="50" type="number" inputmode="decimal" value="800"/>
                                 <span class="input-suffix" data-i18n="mes">€/mes</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="meses_vacios">Meses vacío al año</label>
-                            <input class="form-input" id="mesesVacio" max="12" min="0" step="0.5" type="number" value="1"/>
+                            <input class="form-input" id="mesesVacio" max="12" min="0" step="0.5" type="number" inputmode="decimal" value="1"/>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="incremento_alquiler">Incremento anual del alquiler</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="incrementoAlquiler" max="10" min="0" step="0.1" type="number" value="2"/>
+                                <input class="form-input with-suffix" id="incrementoAlquiler" max="10" min="0" step="0.1" type="number" inputmode="decimal" value="2"/>
                                 <span class="input-suffix">%</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="anos_analisis">Años de análisis</label>
-                            <input class="form-input" id="anosAnalisis" max="40" min="1" step="1" type="number" value="20"/>
+                            <input class="form-input" id="anosAnalisis" max="40" min="1" step="1" type="number" inputmode="decimal" value="20"/>
                         </div>
                     </div>
 
@@ -166,56 +199,56 @@
                         <div class="form-group">
                             <label class="form-label" data-i18n="ibi_anual">IBI anual</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="ibi" min="0" step="50" type="number" value="500"/>
+                                <input class="form-input with-suffix" id="ibi" min="0" step="50" type="number" inputmode="decimal" value="500"/>
                                 <span class="input-suffix" data-i18n="ano">€/año</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="gastos_comunidad">Gastos de comunidad</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="comunidad" min="0" step="10" type="number" value="80"/>
+                                <input class="form-input with-suffix" id="comunidad" min="0" step="10" type="number" inputmode="decimal" value="80"/>
                                 <span class="input-suffix" data-i18n="mes">€/mes</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="seguro_hogar">Seguro de hogar</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="seguro" min="0" step="50" type="number" value="300"/>
+                                <input class="form-input with-suffix" id="seguro" min="0" step="50" type="number" inputmode="decimal" value="300"/>
                                 <span class="input-suffix" data-i18n="ano">€/año</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="seguro_impago">Seguro de impago</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="seguroImpago" min="0" step="50" type="number" value="200"/>
+                                <input class="form-input with-suffix" id="seguroImpago" min="0" step="50" type="number" inputmode="decimal" value="200"/>
                                 <span class="input-suffix" data-i18n="ano">€/año</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="mantenimiento">Mantenimiento y reparaciones</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="mantenimiento" min="0" step="50" type="number" value="500"/>
+                                <input class="form-input with-suffix" id="mantenimiento" min="0" step="50" type="number" inputmode="decimal" value="500"/>
                                 <span class="input-suffix" data-i18n="ano">€/año</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="administracion">Administración/Gestión</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="administracion" min="0" step="10" type="number" value="60"/>
+                                <input class="form-input with-suffix" id="administracion" min="0" step="10" type="number" inputmode="decimal" value="60"/>
                                 <span class="input-suffix" data-i18n="mes">€/mes</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="incremento_gastos">Incremento anual de gastos</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="incrementoGastos" max="10" min="0" step="0.1" type="number" value="0"/>
+                                <input class="form-input with-suffix" id="incrementoGastos" max="10" min="0" step="0.1" type="number" inputmode="decimal" value="0"/>
                                 <span class="input-suffix">%</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="tasa_impositiva">Tasa impositiva sobre alquiler neto</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="taxAlquiler" max="47" min="0" step="0.1" type="number" value="21"/>
+                                <input class="form-input with-suffix" id="taxAlquiler" max="47" min="0" step="0.1" type="number" inputmode="decimal" value="21"/>
                                 <span class="input-suffix">%</span>
                             </div>
                         </div>
@@ -226,28 +259,28 @@
                         <div class="form-group">
                             <label class="form-label" data-i18n="revalorizacion_anual">Revalorización anual del inmueble</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="revalorizacion" max="15" min="-5" step="0.1" type="number" value="2.5"/>
+                                <input class="form-input with-suffix" id="revalorizacion" max="15" min="-5" step="0.1" type="number" inputmode="decimal" value="2.5"/>
                                 <span class="input-suffix">%</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="gastos_venta">Gastos de venta futura</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="gastosVenta" max="15" min="0" step="0.1" type="number" value="8"/>
+                                <input class="form-input with-suffix" id="gastosVenta" max="15" min="0" step="0.1" type="number" inputmode="decimal" value="8"/>
                                 <span class="input-suffix">%</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="plusvalia">Impuesto plusvalía municipal</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="plusvalia" min="0" step="100" type="number" value="2000"/>
+                                <input class="form-input with-suffix" id="plusvalia" min="0" step="100" type="number" inputmode="decimal" value="2000"/>
                                 <span class="input-suffix">€</span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" data-i18n="irpf_venta">IRPF por venta (19-23%)</label>
                             <div class="input-group">
-                                <input class="form-input with-suffix" id="irpfVenta" max="47" min="0" step="0.1" type="number" value="19"/>
+                                <input class="form-input with-suffix" id="irpfVenta" max="47" min="0" step="0.1" type="number" inputmode="decimal" value="19"/>
                                 <span class="input-suffix">%</span>
                             </div>
                         </div>
@@ -321,6 +354,30 @@
                 </div>
             </div>
         </section>
+
+        <!-- ══════════════════════════════════════════════════
+             BLOQUE PUBLICITARIO — Google AdSense
+             Sustituye "ca-pub-XXXXXXXXXXXXXXXXX" y
+             "XXXXXXXXXX" por tus IDs reales de AdSense.
+             Mientras no tengas cuenta aprobada puedes
+             dejarlo comentado o usar otro proveedor.
+        ══════════════════════════════════════════════════ -->
+       <!--  <div class="ad-banner-container">
+            <div class="ad-label">Publicidad</div>
+            <!-- AdSense responsive -->
+           <!-- <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                 data-ad-slot="XXXXXXXXXX"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true">
+            </ins>
+            <!-- Descomenta el script de AdSense cuando tengas cuenta aprobada:
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            -->
+        </div>
+
     </main>
 
     <!-- Resumen flotante (mobile) -->
@@ -329,6 +386,27 @@
         <div id="floatingValue" class="floating-value">-</div>
         <div class="floating-tir" id="floatingTir"></div>
     </div>
+
+    <!-- ══════════════════════════════════════════════════
+         FOOTER — Invítame a un café ☕
+    ══════════════════════════════════════════════════ -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p class="footer-text" data-i18n="footer_texto">
+                Herramienta gratuita, hecha con ❤️ para inversores como tú
+            </p>
+            <a class="btn-coffee"
+               href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=boarding87%40gmail.com&currency_code=EUR"
+               target="_blank"
+               rel="noopener noreferrer">
+                ☕ <span data-i18n="footer_cafe">¿Te ha sido útil? Invítame a un café</span>
+            </a>
+            <p class="footer-disclaimer" data-i18n="footer_disclaimer">
+                Esta herramienta es orientativa y no constituye asesoramiento financiero.
+            </p>
+        </div>
+    </footer>
+
 </div>
 
 <script src="app.js"></script>
