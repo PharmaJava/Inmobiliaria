@@ -1353,3 +1353,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // Calcular automáticamente al cargar
     calcular();
 });
+// --- Lógica de Cookies ---
+function mostrarBannerCookies() {
+    const banner = document.getElementById('cookie-banner');
+    const cookiesAceptadas = localStorage.getItem('cookiesAceptadas');
+
+    if (!cookiesAceptadas) {
+        // Un pequeño retraso para que el usuario vea primero la web
+        setTimeout(() => {
+            banner.classList.add('visible');
+        }, 1500);
+    }
+}
+
+function aceptarCookies() {
+    const banner = document.getElementById('cookie-banner');
+    localStorage.setItem('cookiesAceptadas', 'true');
+    banner.classList.remove('visible');
+}
+
+// Ejecutar al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+    mostrarBannerCookies();
+    // ... aquí va el resto de tu código de inicialización de la calculadora ...
+});
