@@ -480,6 +480,32 @@ body {
     line-height: 1.4;
 }
 
+.field-warning {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.4rem 0.75rem;
+    background: rgba(245, 158, 11, 0.08);
+    border-left: 3px solid var(--warning);
+    border-radius: 0 8px 8px 0;
+    color: #92400e;
+    line-height: 1.4;
+}
+
+.input-warning {
+    border-color: var(--warning) !important;
+}
+
+.metric-microcopy {
+    margin-top: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-light);
+    font-style: italic;
+    line-height: 1.4;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--light);
+}
+
 
 .slider-container {
     margin-top: 0.75rem;
@@ -597,7 +623,7 @@ body {
    ============================================================ */
 .action-buttons {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto auto 1fr;
     gap: 0.75rem;
     margin-top: 0.5rem;
 }
@@ -643,6 +669,107 @@ body {
     border-color: var(--primary);
     background: rgba(59, 130, 246, 0.04);
     transform: translateY(-2px);
+}
+
+.btn-reset {
+    background: var(--white);
+    color: var(--text-light);
+    border: 2px solid var(--border);
+    font-size: 1.1rem;
+    padding: 1.1rem 1rem;
+    border-radius: 14px;
+    white-space: nowrap;
+}
+
+.btn-reset:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.04);
+    transform: translateY(-2px);
+    transform: rotate(180deg) translateY(2px);
+}
+
+/* ============================================================
+   DOUGHNUT CHART
+   ============================================================ */
+.chart-card {
+    background: var(--white);
+    border-radius: 18px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--gradient-main);
+}
+
+.chart-title {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1.25rem;
+}
+
+.chart-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.chart-canvas-wrap {
+    position: relative;
+    max-width: 220px;
+    margin: 0 auto;
+}
+
+.chart-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-value {
+    margin-left: auto;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    color: var(--dark);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+    .chart-layout {
+        grid-template-columns: 1fr;
+    }
+    .chart-canvas-wrap {
+        max-width: 180px;
+    }
 }
 
 .btn-block {
@@ -903,12 +1030,52 @@ body {
 }
 
 /* ============================================================
-   SEO SECTION
+   SEO SECTION — contenido semántico
    ============================================================ */
 .seo-section {
     margin-top: 1rem;
     padding-top: 2.5rem;
     border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.seo-intro {
+    max-width: 860px;
+    margin: 0 auto 3rem;
+    text-align: center;
+    color: white;
+}
+
+.seo-intro h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 800;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+
+.seo-intro p {
+    font-size: 1rem;
+    opacity: 0.85;
+    line-height: 1.8;
+    margin-bottom: 0.75rem;
+}
+
+.seo-metrics-guide {
+    margin-bottom: 3rem;
+}
+
+.seo-metrics-guide > h2 {
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    font-weight: 800;
+    color: white;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.seo-metrics-guide > p {
+    color: rgba(255,255,255,0.75);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
 }
 
 .seo-grid {
@@ -944,10 +1111,100 @@ body {
 }
 
 .seo-card p {
-    font-size: 0.975rem;
+    font-size: 0.95rem;
     line-height: 1.7;
-    opacity: 0.8;
+    color: rgba(255,255,255,0.82);
+    margin-bottom: 0.75rem;
+}
+
+.metric-guide-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+}
+
+/* Artículo largo */
+.seo-article {
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 2.5rem;
+    color: white;
+    margin-bottom: 1.5rem;
+}
+
+.seo-article h2 {
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.seo-article h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.95);
+    margin: 1.75rem 0 0.6rem;
+}
+
+.seo-article h3:first-of-type {
+    margin-top: 0;
+}
+
+.seo-article p {
+    font-size: 0.97rem;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.82);
+    margin-bottom: 0.5rem;
+}
+
+.seo-article strong {
+    color: white;
+    font-weight: 700;
+}
+
+.seo-article em {
+    color: rgba(255,255,255,0.65);
+    font-style: italic;
+}
+
+/* Disclaimer box */
+.seo-disclaimer-box {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
     color: rgba(255,255,255,0.85);
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.seo-disclaimer-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+.seo-disclaimer-box strong {
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .seo-article {
+        padding: 1.5rem;
+    }
+    .seo-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ============================================================
@@ -1082,11 +1339,11 @@ body {
     }
 
     .action-buttons {
-        grid-template-columns: 1fr;
+        grid-template-columns: auto auto 1fr;
     }
 
     .btn-share {
-        order: 2;
+        order: unset;
     }
 
     .floating-summary.visible {
