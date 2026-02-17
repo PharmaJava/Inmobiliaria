@@ -64,7 +64,7 @@ const translations = {
         valor_final: "Valor Neto al Vender",
         flujo_acumulado: "Flujo Acumulado",
         capital_necesario: "Capital necesario para empezar",
-        cashflow_mensual_neto: "Cashflow mensual neto (Año 1)",
+        cashflow_mensual_neto: "Cashflow mensual NETO (tras impuestos, año 1)",
         rentabilidad_anual_compuesta: "Rentabilidad anual compuesta",
         basado_flujo_anual: "Basado en flujo de caja año 1",
         en_anos: "en",
@@ -122,6 +122,11 @@ const translations = {
         cashflow_negativo: "Cashflow Negativo: Necesitarás aportar",
         mensuales_adicionales: "€ mensuales adicionales de tu bolsillo.",
         excelente_rentabilidad: "Excelente Rentabilidad: Esta inversión supera significativamente la media del mercado inmobiliario español (4-6% anual).",
+        comunidad_autonoma: "Comunidad Autónoma",
+        ccaa_selecciona: "— Selecciona para ajustar el ITP —",
+        itp_hint_default: "El ITP se calcula automáticamente según el tipo de vivienda (7% por defecto)",
+        itp_hint_ccaa: "ITP ajustado al tipo de tu comunidad autónoma",
+        itp_hint_nueva: "Vivienda nueva: 10% IVA + 1.2% AJD (no aplica ITP)",
         disclaimer_titulo: "Aviso Legal",
         disclaimer_texto: "Esta calculadora proporciona estimaciones orientativas con fines informativos. Los resultados <strong>no constituyen asesoramiento financiero, fiscal ni jurídico</strong>. Las rentabilidades pasadas no garantizan rentabilidades futuras. Consulta siempre con un profesional cualificado antes de tomar decisiones de inversión.",
         disclaimer_acepto: "He leído y acepto que esta herramienta es orientativa y no sustituye al asesoramiento profesional",
@@ -133,7 +138,10 @@ const translations = {
         seo_cashflow_titulo: "Cashflow positivo vs negativo",
         seo_cashflow_texto: "Un cashflow positivo significa que el alquiler cubre todos los gastos e hipoteca con dinero de sobra cada mes. Un cashflow negativo implica que debes aportar dinero mensualmente, apostando por la revalorización futura del inmueble.",
         seo_aviso_titulo: "Aviso importante",
-        seo_aviso_texto: "Esta calculadora es una herramienta orientativa. Los resultados dependen de las hipótesis introducidas. La fiscalidad, los tipos de interés y el mercado inmobiliario pueden cambiar significativamente. Consulta siempre con un asesor financiero o fiscal antes de invertir."
+        seo_aviso_texto: "Esta calculadora es una herramienta orientativa. Los resultados dependen de las hipótesis introducidas. La fiscalidad, los tipos de interés y el mercado inmobiliario pueden cambiar significativamente. Consulta siempre con un asesor financiero o fiscal antes de invertir.",
+        footer_texto: "Herramienta gratuita, hecha con ❤️ para inversores como tú",
+        footer_cafe: "¿Te ha sido útil? Invítame a un café",
+        footer_disclaimer: "Esta herramienta es orientativa y no constituye asesoramiento financiero."
     },
     en: {
         calculadora_inversion: "🏠 Real Estate Investment Calculator",
@@ -197,7 +205,7 @@ const translations = {
         valor_final: "Net Sale Value",
         flujo_acumulado: "Accumulated Cashflow",
         capital_necesario: "Capital needed to start",
-        cashflow_mensual_neto: "Net monthly cashflow (Year 1)",
+        cashflow_mensual_neto: "NET monthly cashflow (after taxes, year 1)",
         rentabilidad_anual_compuesta: "Compound annual return",
         basado_flujo_anual: "Based on year 1 cash flow",
         en_anos: "in",
@@ -255,6 +263,11 @@ const translations = {
         cashflow_negativo: "Negative Cashflow: You will need to contribute",
         mensuales_adicionales: "€ monthly out of pocket.",
         excelente_rentabilidad: "Excellent Return: This investment significantly outperforms the Spanish real estate market average (4-6% annually).",
+        comunidad_autonoma: "Autonomous Community",
+        ccaa_selecciona: "— Select to adjust Transfer Tax —",
+        itp_hint_default: "Transfer Tax calculated automatically based on property type (7% default)",
+        itp_hint_ccaa: "Transfer Tax adjusted for your region",
+        itp_hint_nueva: "New property: 10% VAT + 1.2% Stamp Duty (no Transfer Tax)",
         disclaimer_titulo: "Legal Notice",
         disclaimer_texto: "This calculator provides indicative estimates for informational purposes only. Results <strong>do not constitute financial, tax, or legal advice</strong>. Past returns do not guarantee future results. Always consult a qualified professional before making investment decisions.",
         disclaimer_acepto: "I have read and accept that this tool is indicative and does not replace professional advice",
@@ -266,7 +279,10 @@ const translations = {
         seo_cashflow_titulo: "Positive vs negative cashflow",
         seo_cashflow_texto: "A positive cashflow means rental income covers all expenses and mortgage with money to spare each month. A negative cashflow means you need to contribute monthly, betting on future property appreciation.",
         seo_aviso_titulo: "Important notice",
-        seo_aviso_texto: "This calculator is a guideline tool. Results depend on the assumptions entered. Tax law, interest rates, and the property market can change significantly. Always consult a financial or tax advisor before investing."
+        seo_aviso_texto: "This calculator is a guideline tool. Results depend on the assumptions entered. Tax law, interest rates, and the property market can change significantly. Always consult a financial or tax advisor before investing.",
+        footer_texto: "Free tool, made with ❤️ for investors like you",
+        footer_cafe: "Was it useful? Buy me a coffee",
+        footer_disclaimer: "This tool is indicative and does not constitute financial advice."
     }
 };
 
@@ -674,7 +690,11 @@ function calcularImpuestos(precio, tipo) {
     if (tipo === 'nueva') {
         return precio * 0.10 + precio * 0.012;
     }
-    return precio * 0.07;
+    // Usar el tipo de la CC.AA. si está seleccionado
+    const ccaaSelector = document.getElementById('ccaaSelector');
+    const ccaaVal = ccaaSelector ? parseFloat(ccaaSelector.value) : NaN;
+    const itpRate = (!isNaN(ccaaVal) && ccaaVal > 0) ? ccaaVal / 100 : 0.07;
+    return precio * itpRate;
 }
 
 function fmt(num) {
@@ -1077,6 +1097,46 @@ document.addEventListener('DOMContentLoaded', () => {
     if (financiacionTipo) {
         financiacionTipo.addEventListener('change', toggleFinanciacionInputs);
     }
+
+    // Selector CC.AA. — ajusta el ITP automáticamente
+    const ccaaSelector = document.getElementById('ccaaSelector');
+    const tipoViviendaSel = document.getElementById('tipoVivienda');
+    const itpHint = document.getElementById('itpHint');
+    const ccaaGroup = document.getElementById('ccaaGroup');
+
+    function actualizarITPHint() {
+        if (!itpHint) return;
+        const t = translations[currentLanguage];
+        const tipoVivienda = tipoViviendaSel ? tipoViviendaSel.value : 'segunda';
+        if (tipoVivienda === 'nueva') {
+            itpHint.textContent = t.itp_hint_nueva;
+            if (ccaaGroup) ccaaGroup.style.display = 'none';
+        } else {
+            if (ccaaGroup) ccaaGroup.style.display = 'block';
+            const ccaaVal = ccaaSelector ? ccaaSelector.value : '';
+            if (ccaaVal) {
+                itpHint.textContent = `${t.itp_hint_ccaa}: ${ccaaVal}%`;
+            } else {
+                itpHint.textContent = t.itp_hint_default;
+            }
+        }
+    }
+
+    if (ccaaSelector) {
+        ccaaSelector.addEventListener('change', () => {
+            actualizarITPHint();
+            calcular();
+        });
+    }
+
+    if (tipoViviendaSel) {
+        tipoViviendaSel.addEventListener('change', () => {
+            actualizarITPHint();
+            calcular();
+        });
+    }
+
+    actualizarITPHint();
 
     // Botón calcular
     const calcularBtn = document.getElementById('calcularBtn');
