@@ -1480,3 +1480,67 @@ body {
         justify-content: center;
     }
 }
+/* Estilos para el Footer Legal */
+.legal-info {
+    text-align: center;
+    margin-top: 2rem;
+    padding-bottom: 2rem;
+    font-size: 0.85rem;
+}
+
+/* Banner de Cookies Estilo Glass */
+.cookie-banner {
+    position: fixed;
+    bottom: -100px; /* Escondido por defecto */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background: rgba(15, 23, 42, 0.9); /* Fondo oscuro elegante */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    transition: bottom 0.5s ease-in-out;
+}
+
+.cookie-banner.visible {
+    bottom: 20px; /* Aparece suavemente */
+}
+
+.cookie-banner p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.btn-cookie {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 15px;
+    transition: background 0.2s;
+}
+
+.btn-cookie:hover {
+    background: var(--primary-dark);
+}
+
+@media (max-width: 600px) {
+    .cookie-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    .btn-cookie { margin-left: 0; width: 100%; }
+}
