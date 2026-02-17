@@ -58,14 +58,14 @@ const translations = {
         ano: "€/año",
         inversion_inicial: "Inversión Inicial",
         flujo_mensual: "Cashflow Mensual",
-        tir_anualizada: "TIR Anualizada",
+        tir_anualizada: "Rentabilidad anual compuesta estimada",
         roi_anual: "ROI Anual",
         beneficio_total: "Beneficio Total",
         valor_final: "Valor Neto al Vender",
         flujo_acumulado: "Flujo Acumulado",
         capital_necesario: "Capital necesario para empezar",
         cashflow_mensual_neto: "Cashflow mensual NETO (tras impuestos, año 1)",
-        rentabilidad_anual_compuesta: "Rentabilidad anual compuesta",
+        rentabilidad_anual_compuesta: "Estimación basada en flujos proyectados",
         basado_flujo_anual: "Basado en flujo de caja año 1",
         en_anos: "en",
         anos_text: "años",
@@ -141,7 +141,13 @@ const translations = {
         seo_aviso_texto: "Esta calculadora es una herramienta orientativa. Los resultados dependen de las hipótesis introducidas. La fiscalidad, los tipos de interés y el mercado inmobiliario pueden cambiar significativamente. Consulta siempre con un asesor financiero o fiscal antes de invertir.",
         footer_texto: "Herramienta gratuita, hecha con ❤️ para inversores como tú",
         footer_cafe: "¿Te ha sido útil? Invítame a un café",
-        footer_disclaimer: "Esta herramienta es orientativa y no constituye asesoramiento financiero."
+        footer_disclaimer: "Esta herramienta es orientativa y no constituye asesoramiento financiero.",
+        chart_titulo: "📊 Distribución de costes mensuales",
+        chart_hipoteca: "Hipoteca",
+        chart_gastos_fijos: "Gastos fijos",
+        chart_impuestos: "Impuestos",
+        chart_cashflow: "Cashflow neto",
+        reset_confirm: "¿Restablecer todos los valores por defecto?"
     },
     en: {
         calculadora_inversion: "🏠 Real Estate Investment Calculator",
@@ -199,14 +205,14 @@ const translations = {
         ano: "€/year",
         inversion_inicial: "Initial Investment",
         flujo_mensual: "Monthly Cashflow",
-        tir_anualizada: "Annualized IRR",
+        tir_anualizada: "Estimated compound annual return",
         roi_anual: "Annual ROI",
         beneficio_total: "Total Profit",
         valor_final: "Net Sale Value",
         flujo_acumulado: "Accumulated Cashflow",
         capital_necesario: "Capital needed to start",
         cashflow_mensual_neto: "NET monthly cashflow (after taxes, year 1)",
-        rentabilidad_anual_compuesta: "Compound annual return",
+        rentabilidad_anual_compuesta: "Estimate based on projected cashflows",
         basado_flujo_anual: "Based on year 1 cash flow",
         en_anos: "in",
         anos_text: "years",
@@ -282,7 +288,13 @@ const translations = {
         seo_aviso_texto: "This calculator is a guideline tool. Results depend on the assumptions entered. Tax law, interest rates, and the property market can change significantly. Always consult a financial or tax advisor before investing.",
         footer_texto: "Free tool, made with ❤️ for investors like you",
         footer_cafe: "Was it useful? Buy me a coffee",
-        footer_disclaimer: "This tool is indicative and does not constitute financial advice."
+        footer_disclaimer: "This tool is indicative and does not constitute financial advice.",
+        chart_titulo: "📊 Monthly cost breakdown",
+        chart_hipoteca: "Mortgage",
+        chart_gastos_fijos: "Fixed expenses",
+        chart_impuestos: "Taxes",
+        chart_cashflow: "Net cashflow",
+        reset_confirm: "Reset all values to defaults?"
     }
 };
 
@@ -291,6 +303,8 @@ let currentLanguage = 'es';
 // ============================================================
 // DISCLAIMER
 // ============================================================
+const DISCLAIMER_VERSION = 'v1';
+
 function initDisclaimer() {
     const overlay = document.getElementById('disclaimerOverlay');
     const check = document.getElementById('disclaimerCheck');
@@ -298,8 +312,8 @@ function initDisclaimer() {
 
     if (!overlay || !check || !btn) return;
 
-    // Si ya aceptó en esta sesión, no mostrar
-    if (sessionStorage.getItem('disclaimerAccepted') === 'true') {
+    // localStorage con versión — persiste entre sesiones
+    if (localStorage.getItem(`disclaimerAccepted_${DISCLAIMER_VERSION}`) === 'true') {
         overlay.classList.add('hidden');
         return;
     }
@@ -310,7 +324,7 @@ function initDisclaimer() {
 
     btn.addEventListener('click', () => {
         if (check.checked) {
-            sessionStorage.setItem('disclaimerAccepted', 'true');
+            localStorage.setItem(`disclaimerAccepted_${DISCLAIMER_VERSION}`, 'true');
             overlay.style.opacity = '0';
             overlay.style.transition = 'opacity 0.4s ease';
             setTimeout(() => overlay.classList.add('hidden'), 400);
@@ -390,7 +404,7 @@ const escenarios = {
         incrementoAlquiler: 2,
         mesesVacio: 1,
         incrementoGastos: 1,
-        revalorizacion: 2.5,
+        revalorizacion: 3.5,
         taxAlquiler: 21
     },
     optimista: {
@@ -496,6 +510,57 @@ function cargarDesdeURL() {
     actualizarEntradaSlider();
     toggleFinanciacionInputs();
     calcular();
+}
+
+// ============================================================
+// VALIDACIONES — warnings visuales en campos
+// ============================================================
+function validarEntradas({ mesesVacio, entradaEuros, precio }) {
+    // Meses vacío > 6
+    const mesesInput = document.getElementById('mesesVacio');
+    if (mesesInput) {
+        if (mesesVacio > 6) {
+            setFieldWarning(mesesInput, currentLanguage === 'es'
+                ? '⚠️ Más de 6 meses vacío es inusual. Verifica que es correcto.'
+                : '⚠️ More than 6 vacant months is unusual. Please verify.');
+        } else {
+            clearFieldWarning(mesesInput);
+        }
+    }
+
+    // Entrada > 50% del precio
+    const entradaInput = document.getElementById('entradaEuros');
+    const porcentajeEntrada = precio > 0 ? (entradaEuros / precio) * 100 : 0;
+    if (entradaInput) {
+        if (porcentajeEntrada > 50 && porcentajeEntrada < 100) {
+            setFieldWarning(entradaInput, currentLanguage === 'es'
+                ? '✅ Entrada conservadora (+50%). El apalancamiento es bajo.'
+                : '✅ Conservative down payment (+50%). Low leverage.');
+        } else {
+            clearFieldWarning(entradaInput);
+        }
+    }
+}
+
+function setFieldWarning(input, message) {
+    clearFieldWarning(input);
+    const group = input.closest('.form-group');
+    if (!group) return;
+    const existing = group.querySelector('.field-warning');
+    if (existing) { existing.textContent = message; return; }
+    const div = document.createElement('div');
+    div.className = 'field-warning';
+    div.textContent = message;
+    group.appendChild(div);
+    input.classList.add('input-warning');
+}
+
+function clearFieldWarning(input) {
+    const group = input.closest('.form-group');
+    if (!group) return;
+    const existing = group.querySelector('.field-warning');
+    if (existing) existing.remove();
+    input.classList.remove('input-warning');
 }
 
 // ============================================================
@@ -634,7 +699,10 @@ function calcular() {
         };
 
         document.getElementById('resultados').innerHTML = mostrarResultados(datos);
+        // Renderizar gráfico DESPUÉS de inyectar el HTML (el canvas ya existe en el DOM)
+        requestAnimationFrame(() => renderizarDoughnut(datos));
         actualizarResumenFlotante(datos);
+        validarEntradas({ mesesVacio, entradaEuros, precio });
 
     } catch (err) {
         console.error(err);
@@ -699,6 +767,115 @@ function calcularImpuestos(precio, tipo) {
 
 function fmt(num) {
     return num.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 });
+}
+
+// ============================================================
+// RESET — valores por defecto
+// ============================================================
+const defaultValues = {
+    precio: 95000, gastosCompra: 2500, reforma: 4000,
+    tipoVivienda: 'segunda', financiacionTipo: 'con_hipoteca',
+    entradaEuros: 19000, interes: 3.2, anos: 25, gastosHipoteca: 1800,
+    alquiler: 700, mesesVacio: 0.5, incrementoAlquiler: 2, anosAnalisis: 20,
+    ibi: 380, comunidad: 55, seguro: 220, seguroImpago: 160,
+    mantenimiento: 400, administracion: 0, incrementoGastos: 0, taxAlquiler: 19,
+    revalorizacion: 3.5, gastosVenta: 8, plusvalia: 2000, irpfVenta: 19
+};
+
+function resetCalculadora() {
+    if (!confirm(translations[currentLanguage].reset_confirm)) return;
+    for (const [id, val] of Object.entries(defaultValues)) {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+    }
+    const ccaa = document.getElementById('ccaaSelector');
+    if (ccaa) ccaa.value = '';
+    actualizarEntradaSlider();
+    actualizarITPHint();
+    toggleFinanciacionInputs();
+    // Marcar escenario realista
+    document.querySelectorAll('.btn-scenario').forEach(b => b.classList.remove('active'));
+    const realista = document.querySelector("[onclick=\"aplicarEscenario('realista')\"]");
+    if (realista) realista.classList.add('active');
+    calcular();
+}
+
+// ============================================================
+// DOUGHNUT CHART
+// ============================================================
+let doughnutInstance = null;
+
+function generarDoughnutHTML(datos) {
+    return `<div class="chart-card" id="chartCard">
+        <div class="chart-title" id="chartTitleEl"></div>
+        <div class="chart-layout">
+            <div class="chart-canvas-wrap">
+                <canvas id="doughnutChart" width="220" height="220"></canvas>
+            </div>
+            <div class="chart-legend" id="chartLegend"></div>
+        </div>
+    </div>`;
+}
+
+function renderizarDoughnut(datos) {
+    const t = translations[currentLanguage];
+    const titleEl = document.getElementById('chartTitleEl');
+    if (titleEl) titleEl.textContent = t.chart_titulo;
+
+    const ingresos = datos.ingresosMensuales;
+    const hipoteca = datos.financiacionTipo === 'con_hipoteca' ? datos.cuotaHipoteca : 0;
+    const gastosFijos = datos.comunidad + datos.ibi / 12 + datos.seguro / 12 +
+                        datos.seguroImpago / 12 + datos.mantenimiento / 12 + datos.administracion;
+    const impuestos = datos.taxMensual;
+    const cashflow = Math.max(0, datos.flujoMensual);
+
+    const values = [hipoteca, gastosFijos, impuestos, cashflow].map(v => Math.max(0, v));
+    const labels = [t.chart_hipoteca, t.chart_gastos_fijos, t.chart_impuestos, t.chart_cashflow];
+    const colors = ['#667eea', '#f59e0b', '#ef4444', '#10b981'];
+
+    const canvas = document.getElementById('doughnutChart');
+    if (!canvas) return;
+
+    if (doughnutInstance) { doughnutInstance.destroy(); doughnutInstance = null; }
+
+    doughnutInstance = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: colors,
+                borderWidth: 3,
+                borderColor: '#fff',
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            cutout: '68%',
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.parsed.toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} €/mes`
+                    }
+                }
+            },
+            animation: { animateRotate: true, duration: 600 }
+        }
+    });
+
+    // Leyenda manual
+    const legend = document.getElementById('chartLegend');
+    if (legend) {
+        legend.innerHTML = labels.map((lbl, i) => `
+            <div class="legend-item">
+                <div class="legend-dot" style="background:${colors[i]}"></div>
+                <span>${lbl}</span>
+                <span class="legend-value">${values[i].toLocaleString(currentLanguage === 'es' ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} €</span>
+            </div>
+        `).join('');
+    }
 }
 
 // ============================================================
@@ -818,6 +995,7 @@ function mostrarResultados(datos) {
                 </div>
                 <div class="metric-value ${flujoClass}">${fmt(datos.flujoMensual)} €</div>
                 <div class="metric-subtitle">${t.cashflow_mensual_neto}</div>
+                <div class="metric-microcopy">👉 Para renta pasiva mensual, prioriza este dato</div>
             </div>
 
             <div class="metric-card">
@@ -827,6 +1005,7 @@ function mostrarResultados(datos) {
                 </div>
                 <div class="metric-value ${roiClass}">${datos.roiAnual.toFixed(2)}%</div>
                 <div class="metric-subtitle">${t.basado_flujo_anual}</div>
+                <div class="metric-microcopy">ROI alto + cashflow negativo = riesgo de liquidez</div>
             </div>
 
             <div class="metric-card">
@@ -836,6 +1015,7 @@ function mostrarResultados(datos) {
                 </div>
                 <div class="metric-value ${rentabilidadClass}">${datos.rentabilidadAnual.toFixed(2)}%</div>
                 <div class="metric-subtitle">${t.rentabilidad_anual_compuesta}</div>
+                <div class="metric-microcopy">👉 Para acumulación de patrimonio a largo plazo</div>
             </div>
 
             <div class="metric-card">
@@ -858,6 +1038,7 @@ function mostrarResultados(datos) {
         </div>
 
         <!-- DESGLOSE + CASHFLOW LADO A LADO -->
+        ${generarDoughnutHTML(datos)}
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem; margin-bottom:1.25rem;">
             <div class="detail-card">
                 <div class="detail-card-title">${t.desglose_inversion}</div>
@@ -1137,6 +1318,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     actualizarITPHint();
+
+    // Botón reset
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetCalculadora);
+    }
 
     // Botón calcular
     const calcularBtn = document.getElementById('calcularBtn');
