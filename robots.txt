@@ -1,0 +1,11 @@
+# Bienvenido, Googlebot y amigos.
+User-agent: *
+Allow: /
+
+# No perdáis tiempo rastreando estos archivos si existen
+Disallow: /README.md
+Disallow: /LICENSE
+Disallow: /.git/
+
+# Aquí tenéis el mapa del tesoro
+Sitemap: https://pisorentable.org/sitemap.xml
