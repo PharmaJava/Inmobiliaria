@@ -28,10 +28,14 @@
     --radius: 20px;
 }
 
+html {
+    min-height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
 body {
     font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-    background: var(--gradient-main);
-    background-attachment: fixed;
+    background: transparent;
     min-height: 100vh;
     color: var(--text);
     line-height: 1.6;
@@ -1292,12 +1296,26 @@ body {
 }
 
 .detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.55rem 0;
-    font-size: 1rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
     border-bottom: 1px solid var(--light);
+    line-height: 1.4;
+}
+
+.detail-row span:first-child {
+    min-width: 0;          /* permite que el texto haga wrap sin romper el layout */
+}
+
+.detail-row span:last-child {
+    text-align: right;
+    white-space: nowrap;   /* el número nunca se rompe */
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums; /* dígitos de ancho fijo */
 }
 
 .detail-row:last-child {
@@ -1306,7 +1324,7 @@ body {
 
 .detail-row.total {
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     padding-top: 0.75rem;
     margin-top: 0.25rem;
     border-top: 2px solid var(--border);
@@ -2222,3 +2240,94 @@ html.dark .metric-tooltip-popup {
     font-size: 0.95rem;
     padding: 0.8rem 0.9rem !important;
 }
+
+/* ── Header controls (dark toggle + lang selector) ── */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+}
+.dark-mode-toggle {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px;
+    padding: 0.4rem 0.65rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    line-height: 1;
+}
+.dark-mode-toggle:hover { background: rgba(255,255,255,0.25); }
+
+/* ── Gráfico evolución temporal ── */
+.line-chart-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow);
+}
+.line-chart-title { font-weight: 700; font-size: 0.95rem; color: var(--dark); margin-bottom: 1rem; font-family: 'DM Sans', sans-serif; }
+.line-chart-wrap { height: 260px; position: relative; }
+
+/* ── Tooltips en métricas ── */
+[data-tooltip-key] { cursor: help; position: relative; }
+[data-tooltip-key]::after { content: ' ⓘ'; font-size: 0.75rem; opacity: 0.5; position: absolute; top: 0.6rem; right: 0.6rem; pointer-events: none; }
+.metric-tooltip-popup {
+    position: absolute; z-index: 8000; background: var(--dark); color: #f1f5f9;
+    font-size: 0.8rem; line-height: 1.5; padding: 0.75rem 1rem; border-radius: 10px;
+    max-width: 300px; box-shadow: var(--shadow-xl); pointer-events: none; animation: tooltipFade 0.15s ease;
+}
+@keyframes tooltipFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Calculadora inversa ── */
+.inverse-calc-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+.inverse-calc-header { margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+.inverse-calc-title { font-weight: 700; font-size: 0.95rem; color: var(--dark); font-family: 'DM Sans', sans-serif; margin-bottom: 0.25rem; }
+.inverse-calc-subtitle { font-size: 0.82rem; color: var(--text-light); margin-bottom: 1rem; }
+.inverse-field label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+.inversa-resultado-header { background: var(--primary); color: white; font-weight: 700; font-size: 0.85rem; padding: 0.6rem 0.9rem; border-radius: 8px 8px 0 0; margin-top: 1rem; }
+.inversa-resultado-body { border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; overflow: hidden; }
+.inversa-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.9rem; font-size: 0.88rem; color: var(--text); border-bottom: 1px solid var(--border); }
+.inversa-row:last-of-type { border-bottom: none; }
+.inversa-row--main { background: linear-gradient(135deg, rgba(103,126,234,0.05), rgba(103,126,234,0.1)); padding: 1rem 0.9rem !important; flex-direction: column; align-items: flex-start !important; gap: 0.2rem; }
+.inversa-main-label { font-size: 0.78rem; color: var(--text-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+.inversa-main-value { font-size: 1.6rem; font-weight: 800; line-height: 1.1; font-family: 'DM Sans', sans-serif; }
+.inversa-main-sub { font-size: 0.8rem; font-weight: 600; }
+.inversa-divider { background: var(--light); color: var(--text-light); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.4rem 0.9rem; border-bottom: 1px solid var(--border); }
+.inversa-row--total { background: rgba(103,126,234,0.06); border-top: 2px solid var(--primary) !important; font-size: 0.92rem; }
+.inversa-row--highlight { background: rgba(16,185,129,0.06); border-top: 2px solid var(--success) !important; font-size: 0.95rem; padding: 0.8rem 0.9rem !important; }
+.inversa-nota { font-size: 0.72rem; color: var(--text-light); padding: 0.4rem 0.9rem 0.6rem; border-top: 1px solid var(--border); }
+
+/* ── Dark mode ── */
+html.dark {
+    --primary: #818cf8; --primary-dark: #6366f1; --secondary: #22d3ee;
+    --success: #34d399; --danger: #f87171; --warning: #fbbf24;
+    --dark: #f1f5f9; --dark-light: #e2e8f0; --light: #1e293b;
+    --white: #0f172a; --border: #334155; --text: #cbd5e1; --text-light: #64748b;
+    --glass: rgba(0,0,0,0.2);
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -1px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.5);
+    background: #020617;
+}
+html.dark body { color: var(--text); }
+html.dark .glass-card, html.dark .detail-card, html.dark .chart-card,
+html.dark .line-chart-card, html.dark .inverse-calc-card,
+html.dark .projection-table-container { background: #0f172a; border-color: #334155; }
+html.dark .nav-tabs { background: #1e293b; }
+html.dark .nav-tab.active { background: #0f172a; }
+html.dark .projection-table th { background: #1e293b; }
+html.dark .form-input, html.dark .form-select { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+html.dark .seo-card { background: #0f172a; border-color: #334155; }
+html.dark .metric-card { background: #0f172a; border-color: #334155; }
+html.dark .proyeccion-modal-box { background: #0f172a; }
+html.dark .proyeccion-modal-section { border-color: #334155; }
+html.dark .proyeccion-modal-section-title { background: #1e293b; }
+html.dark .seo-disclaimer-box { background: #1e293b; }
+html.dark .inversa-row { border-color: #334155; }
+html.dark .metric-tooltip-popup { background: #1e293b; border: 1px solid #334155; }
