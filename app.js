@@ -649,6 +649,9 @@ function calcular() {
             inversionInicial,
             ingresosMensuales,
             cuotaHipoteca,
+            prestamo,
+            interes,
+            anos,
             comunidad,
             ibi,
             seguro,
@@ -671,12 +674,14 @@ function calcular() {
             financiacionTipo
         };
 
-        window._lastDatos = datos; // Guardamos para exportar PDF
+        window._lastDatos = datos;
+        window._hipotecaDatos = datos;
         document.getElementById('resultados').innerHTML = mostrarResultados(datos);
-        // Renderizar gráficos DESPUÉS de inyectar el HTML
+        // Renderizar gráficos y tabla hipoteca DESPUÉS de inyectar el HTML
         requestAnimationFrame(() => {
             renderizarDoughnut(datos);
             renderizarLineChart(datos);
+            if (financiacionTipo === 'con_hipoteca') renderizarTablaHipoteca(datos, null, 0, 'cuota');
         });
         actualizarResumenFlotante(datos);
         validarEntradas({ mesesVacio, entradaEuros, precio });
@@ -1205,23 +1210,26 @@ function mostrarResultados(datos) {
             </div>
         </div>
 
-        <!-- COMPARACIÓN CON OTRAS INVERSIONES -->
-        <div class="detail-card" style="margin-bottom:1.25rem;">
-            <div class="detail-card-title">${t.comparacion_inversiones}</div>
-            <div class="comparison-table">${comparacionHTML}</div>
-            <p style="font-size:0.75rem; color:var(--text-light); margin-top:0.75rem;">* ${currentLanguage === 'es' ? 'Rentabilidades de referencia a feb 2026. No constituyen garantía de rentabilidad futura.' : 'Reference returns as of Feb 2026. Do not constitute a guarantee of future performance.'}</p>
-        </div>
+        <!-- CALCULADORA INVERSA (justo tras distribución de costes) -->
+        ${generarCalculadoraInversaHTML()}
 
         <!-- GRÁFICO DE EVOLUCIÓN TEMPORAL -->
         ${generarLineChartHTML()}
 
-        <!-- CALCULADORA INVERSA -->
-        ${generarCalculadoraInversaHTML()}
+        <!-- TABLA DE HIPOTECA CON AMORTIZACIONES -->
+        ${datos.financiacionTipo === 'con_hipoteca' ? generarTablaHipotecaHTML(datos) : ''}
 
         <!-- TABLA DE PROYECCIONES AÑO A AÑO -->
         <div class="detail-card">
             <div class="detail-card-title">${t.proyecciones_ano}</div>
             ${tablaProyecciones}
+        </div>
+
+        <!-- COMPARACIÓN CON OTRAS INVERSIONES (al final) -->
+        <div class="detail-card" style="margin-bottom:1.25rem;">
+            <div class="detail-card-title">${t.comparacion_inversiones}</div>
+            <div class="comparison-table">${comparacionHTML}</div>
+            <p style="font-size:0.75rem; color:var(--text-light); margin-top:0.75rem;">* ${currentLanguage === 'es' ? 'Rentabilidades de referencia a feb 2026. No constituyen garantía de rentabilidad futura.' : 'Reference returns as of Feb 2026. Do not constitute a guarantee of future performance.'}</p>
         </div>
     `;
 }
@@ -1908,6 +1916,119 @@ function exportToPDF() {
         y += 4;
     }
 
+    // ── TABLA DE HIPOTECA EN PDF ──────────────────────────────
+    if (datos.financiacionTipo === 'con_hipoteca' && datos.prestamo > 0) {
+        newPage();
+        sectionTitle(esEs ? 'Cuadro de Amortizacion Hipotecaria' : 'Mortgage Amortization Schedule');
+
+        // Cabecera resumen
+        setFont('normal', 8.5, C.text || C.grey);
+        const hipIntro = s(esEs
+            ? 'Prestamo: ' + f(datos.prestamo) + ' EUR · Interes: ' + datos.interes + '% · Plazo: ' + datos.anos + ' anos · Cuota mensual: ' + f(datos.cuotaHipoteca) + ' EUR/mes'
+            : 'Loan: ' + f(datos.prestamo) + ' EUR · Rate: ' + datos.interes + '% · Term: ' + datos.anos + ' years · Monthly: ' + f(datos.cuotaHipoteca) + ' EUR/mo');
+        text(hipIntro, ML, y); y += 8;
+
+        // Reconstruir cuadro de amortización año a año
+        const capitalH = datos.prestamo;
+        const interesH = datos.interes;
+        const anosH = datos.anos;
+        const iH = interesH / 100 / 12;
+        let saldoH = capitalH;
+        let cuotaH = calcularCuotaHipoteca(capitalH, interesH, anosH);
+
+        // Comprobar si hay amortización simulada activa
+        const amortYearEl = document.getElementById('amortYear');
+        const amortImporteEl = document.getElementById('amortImporte');
+        const amortTipoEl = document.getElementById('amortTipo');
+        const amortResultadoEl = document.getElementById('amortResultado');
+        const tieneAmort = amortResultadoEl && amortResultadoEl.style.display !== 'none' && amortImporteEl && parseFloat(amortImporteEl.value) > 0;
+        const amortYearVal = tieneAmort && amortYearEl ? parseInt(amortYearEl.value) : null;
+        const amortImporteVal = tieneAmort && amortImporteEl ? parseFloat(amortImporteEl.value) : 0;
+        const amortTipoVal = tieneAmort && amortTipoEl ? amortTipoEl.value : 'cuota';
+
+        // Cabecera de tabla
+        checkPageBreak(10);
+        const colsH = [ML, ML+18, ML+46, ML+76, ML+106, ML+136];
+        const colWH = [16, 26, 28, 28, 28, CW - 136 + ML - ML];
+        fillRect(ML, y, CW, 7, C.primaryDark || [15,52,96]);
+        setFont('bold', 7, C.white);
+        const hdrH = [esEs?'Año':'Year', esEs?'Cuota/mes':'Pmt/mo', esEs?'Capital':'Principal', esEs?'Intereses':'Interest', esEs?'Amort.Extra':'Extra', esEs?'Saldo':'Balance'];
+        hdrH.forEach((h, i2) => text(s(h), colsH[i2] + 1, y + 5));
+        y += 9;
+
+        let totalCapH = 0, totalIntH = 0, totalAmortH = 0;
+        let amortAplicadaH = false;
+        let filasPDF = [];
+
+        for (let year = 1; year <= anosH; year++) {
+            if (saldoH <= 0) break;
+            let capYear = 0, intYear = 0, amortVal = 0;
+            for (let m = 0; m < 12; m++) {
+                if (saldoH <= 0) break;
+                const intMes = saldoH * iH;
+                const capMes = Math.min(cuotaH - intMes, saldoH);
+                saldoH -= capMes;
+                capYear += capMes;
+                intYear += intMes;
+            }
+            if (amortYearVal && year === amortYearVal && saldoH > 0 && !amortAplicadaH) {
+                amortVal = Math.min(amortImporteVal, saldoH);
+                saldoH -= amortVal;
+                amortAplicadaH = true;
+                if (saldoH > 0 && amortTipoVal === 'cuota') {
+                    cuotaH = calcularCuotaHipoteca(saldoH, interesH, anosH - year);
+                }
+            }
+            totalCapH += capYear; totalIntH += intYear; totalAmortH += amortVal;
+            filasPDF.push({ year, cuota: cuotaH, cap: capYear, int: intYear, amort: amortVal, saldo: Math.max(0, saldoH) });
+            if (saldoH <= 0) break;
+        }
+
+        filasPDF.forEach((f2, idx) => {
+            checkPageBreak(7);
+            const bg = idx % 2 === 0 ? [248,250,252] : C.white;
+            fillRect(ML, y, CW, 6.5, bg);
+            if (f2.amort > 0) fillRect(ML, y, CW, 6.5, [255,247,230]);
+            setFont('bold', 7, C.dark || C.text);
+            text(s((esEs?'Año ':'Year ') + f2.year), colsH[0] + 1, y + 4.5);
+            setFont('normal', 7, C.text || C.grey);
+            text(s(f(Math.round(f2.cuota))), colsH[1] + 1, y + 4.5);
+            setFont('normal', 7, C.accent || [16,185,129]);
+            text(s(f(Math.round(f2.cap))), colsH[2] + 1, y + 4.5);
+            setFont('normal', 7, C.danger || [239,68,68]);
+            text(s(f(Math.round(f2.int))), colsH[3] + 1, y + 4.5);
+            setFont('normal', 7, f2.amort > 0 ? [180,90,0] : C.grey);
+            text(s(f2.amort > 0 ? ('-' + f(Math.round(f2.amort))) : '—'), colsH[4] + 1, y + 4.5);
+            setFont('bold', 7, C.dark || C.text);
+            text(s(f(Math.round(f2.saldo))), colsH[5] + 1, y + 4.5);
+            y += 6.5;
+        });
+
+        // Fila de totales
+        checkPageBreak(8);
+        fillRect(ML, y, CW, 7, C.primaryDark || [15,52,96]);
+        setFont('bold', 7.5, C.white);
+        text('TOTAL', colsH[0] + 1, y + 5);
+        text('—', colsH[1] + 1, y + 5);
+        text(s(f(Math.round(totalCapH))), colsH[2] + 1, y + 5);
+        text(s(f(Math.round(totalIntH))), colsH[3] + 1, y + 5);
+        text(s(totalAmortH > 0 ? '-' + f(Math.round(totalAmortH)) : '—'), colsH[4] + 1, y + 5);
+        text('0', colsH[5] + 1, y + 5);
+        y += 11;
+
+        // Nota
+        setFont('normal', 7, C.grey);
+        text(s(esEs ? '* Cuadro de amortizacion Frances (cuota constante). Valores anuales agregados.' : '* French amortization (constant payment). Annual aggregated values.'), ML, y);
+        y += 8;
+
+        if (tieneAmort) {
+            const amortNota = s(esEs
+                ? '* Amortizacion anticipada simulada: ' + f(Math.round(amortImporteVal)) + ' EUR en el ano ' + amortYearVal + ' (reduce ' + (amortTipoVal === 'cuota' ? 'cuota' : 'plazo') + ').'
+                : '* Early repayment simulated: ' + f(Math.round(amortImporteVal)) + ' EUR in year ' + amortYearVal + ' (reduces ' + (amortTipoVal === 'cuota' ? 'payment' : 'term') + ').');
+            text(amortNota, ML, y); y += 8;
+        }
+    }
+
     // ── ÚLTIMA PÁGINA: COMPARATIVA DE RENTABILIDADES ─────────
     newPage();
     sectionTitle(esEs ? 'Comparativa con Otras Inversiones' : 'Comparison with Other Investments');
@@ -2310,6 +2431,227 @@ function showTooltip(anchor, text) {
 function hideTooltip() {
     if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
 }
+
+// ============================================================
+// ============================================================
+// TABLA DE HIPOTECA CON AMORTIZACIONES
+// ============================================================
+function generarTablaHipotecaHTML(datos) {
+    const esEs = currentLanguage === 'es';
+    return `
+    <div class="hipoteca-card detail-card" id="hipotecaCard">
+        <div class="detail-card-title">🏦 ${esEs ? 'Cuadro de Amortización Hipotecaria' : 'Mortgage Amortization Schedule'}</div>
+        <div class="hipoteca-intro">
+            ${esEs
+                ? `Préstamo <strong>${fmt(datos.prestamo)} €</strong> · Interés <strong>${datos.interes}%</strong> · <strong>${datos.anos} años</strong> · Cuota mensual <strong>${fmt(datos.cuotaHipoteca)} €/mes</strong>`
+                : `Loan <strong>${fmt(datos.prestamo)} €</strong> · Rate <strong>${datos.interes}%</strong> · <strong>${datos.anos} years</strong> · Monthly payment <strong>${fmt(datos.cuotaHipoteca)} €/mo</strong>`
+            }
+        </div>
+
+        <!-- Controles de amortización anticipada -->
+        <div class="amort-controls">
+            <div class="amort-section-title">⚡ ${esEs ? 'Simulador de amortización anticipada' : 'Early repayment simulator'}</div>
+            <div class="amort-fields">
+                <div class="amort-field">
+                    <label>${esEs ? 'Año de amortización' : 'Repayment year'}</label>
+                    <input type="number" id="amortYear" class="form-input" min="1" max="${datos.anos}" value="5" step="1"/>
+                </div>
+                <div class="amort-field">
+                    <label>${esEs ? 'Importe (€)' : 'Amount (€)'}</label>
+                    <input type="number" id="amortImporte" class="form-input" min="0" value="10000" step="500"/>
+                </div>
+                <div class="amort-field">
+                    <label>${esEs ? 'Reducir...' : 'Reduce...'}</label>
+                    <select id="amortTipo" class="form-select">
+                        <option value="cuota">${esEs ? 'Cuota mensual' : 'Monthly payment'}</option>
+                        <option value="plazo">${esEs ? 'Plazo (años)' : 'Term (years)'}</option>
+                    </select>
+                </div>
+                <div class="amort-field amort-field--btn">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" style="padding:0.75rem 1.25rem; font-size:0.9rem;" onclick="calcularAmortizacion()">
+                        ${esEs ? '📊 Simular' : '📊 Simulate'}
+                    </button>
+                    <button class="btn btn-share" style="padding:0.75rem 1rem; font-size:0.9rem;" onclick="resetAmortizacion()" title="${esEs ? 'Quitar amortización' : 'Reset'}">✕</button>
+                </div>
+            </div>
+            <div id="amortResultado" class="amort-resultado" style="display:none;"></div>
+        </div>
+
+        <!-- Tabla anual -->
+        <div class="projection-table-container" style="margin-top:1rem;">
+            <table class="projection-table" id="hipotecaTabla">
+                <thead>
+                    <tr>
+                        <th>${esEs ? 'Año' : 'Year'}</th>
+                        <th>${esEs ? 'Cuota/mes' : 'Payment/mo'}</th>
+                        <th>${esEs ? 'Capital pagado' : 'Principal paid'}</th>
+                        <th>${esEs ? 'Intereses pagados' : 'Interest paid'}</th>
+                        <th>${esEs ? 'Amort. anticipada' : 'Extra payment'}</th>
+                        <th>${esEs ? 'Saldo pendiente' : 'Balance'}</th>
+                    </tr>
+                </thead>
+                <tbody id="hipotecaTbody">
+                </tbody>
+                <tfoot id="hipotecaTfoot"></tfoot>
+            </table>
+        </div>
+        <p class="inversa-nota" style="margin-top:0.5rem;">* ${esEs ? 'El cuadro se actualiza automáticamente al simular amortizaciones anticipadas.' : 'The schedule updates automatically when simulating early repayments.'}</p>
+    </div>`;
+}
+
+// Renderiza la tabla de hipoteca (se llama tras calcular() y tras simular amortización)
+window._hipotecaDatos = null;
+
+function renderizarTablaHipoteca(datos, amortYear, amortImporte, amortTipo) {
+    const tbody = document.getElementById('hipotecaTbody');
+    const tfoot = document.getElementById('hipotecaTfoot');
+    if (!tbody || !tfoot) return;
+
+    const esEs = currentLanguage === 'es';
+    const capital = datos.prestamo;
+    const interes = datos.interes;
+    const anosTotal = datos.anos;
+    const i = interes / 100 / 12;
+
+    // Construimos el cuadro mes a mes con posibles amortizaciones
+    let saldo = capital;
+    let cuotaActual = calcularCuotaHipoteca(capital, interes, anosTotal);
+    let mesActual = 1;
+    let totalMeses = anosTotal * 12;
+    let amortAplicada = false;
+    let nuevaCuota = cuotaActual;
+    let nuevosPlazoMeses = totalMeses;
+
+    // Resultados agregados por año
+    const filas = [];
+    let totalCapital = 0, totalIntereses = 0, totalAmort = 0;
+    let mesTermina = anosTotal * 12;
+
+    for (let year = 1; year <= anosTotal; year++) {
+        if (saldo <= 0) break;
+
+        let capitalYear = 0, interesesYear = 0, amortYear_val = 0;
+        const cuotaEsteYear = cuotaActual;
+
+        for (let m = 1; m <= 12; m++) {
+            if (saldo <= 0) break;
+            const interesesMes = saldo * i;
+            const capitalMes = Math.min(cuotaActual - interesesMes, saldo);
+            saldo -= capitalMes;
+            capitalYear += capitalMes;
+            interesesYear += interesesMes;
+            mesTermina = (year - 1) * 12 + m;
+        }
+
+        // Amortización anticipada al final del año indicado
+        if (amortYear && amortImporte && year === amortYear && saldo > 0 && !amortAplicada) {
+            const amortReal = Math.min(amortImporte, saldo);
+            saldo -= amortReal;
+            amortYear_val = amortReal;
+            amortAplicada = true;
+            // Recalcular según tipo
+            if (saldo > 0) {
+                const mesesRestantes = (anosTotal - year) * 12;
+                if (amortTipo === 'cuota') {
+                    cuotaActual = calcularCuotaHipoteca(saldo, interes, (anosTotal - year));
+                    nuevaCuota = cuotaActual;
+                } else {
+                    // Reducir plazo manteniendo cuota
+                    cuotaActual = cuotaEsteYear; // misma cuota
+                    // El plazo efectivo se acortará solo
+                }
+            }
+        }
+
+        totalCapital += capitalYear;
+        totalIntereses += interesesYear;
+        totalAmort += amortYear_val;
+
+        filas.push({ year, cuota: cuotaEsteYear, capital: capitalYear, intereses: interesesYear, amort: amortYear_val, saldo: Math.max(0, saldo) });
+        if (saldo <= 0) break;
+    }
+
+    tbody.innerHTML = filas.map(f => `
+        <tr${f.amort > 0 ? ' class="hipoteca-row-amort"' : ''}>
+            <td><strong>${esEs ? 'Año ' : 'Year '}${f.year}</strong></td>
+            <td>${fmt(f.cuota)} €</td>
+            <td class="metric-info">${fmt(Math.round(f.capital))} €</td>
+            <td class="metric-negative">${fmt(Math.round(f.intereses))} €</td>
+            <td>${f.amort > 0 ? `<span class="amort-badge">-${fmt(Math.round(f.amort))} €</span>` : '—'}</td>
+            <td><strong>${fmt(Math.round(f.saldo))} €</strong></td>
+        </tr>
+    `).join('');
+
+    // Totales en tfoot
+    const anosReales = filas.length;
+    const mesesReales = filas[filas.length - 1] ? mesTermina : anosTotal * 12;
+    tfoot.innerHTML = `
+        <tr class="hipoteca-tfoot">
+            <td><strong>${esEs ? 'TOTAL' : 'TOTAL'}</strong></td>
+            <td>—</td>
+            <td class="metric-info"><strong>${fmt(Math.round(totalCapital))} €</strong></td>
+            <td class="metric-negative"><strong>${fmt(Math.round(totalIntereses))} €</strong></td>
+            <td>${totalAmort > 0 ? `<strong class="amort-badge">-${fmt(Math.round(totalAmort))} €</strong>` : '—'}</td>
+            <td><strong>0 €</strong></td>
+        </tr>
+    `;
+}
+
+window.calcularAmortizacion = function() {
+    const d = window._hipotecaDatos;
+    if (!d) return;
+    const yr = parseInt(document.getElementById('amortYear')?.value) || 5;
+    const imp = parseFloat(document.getElementById('amortImporte')?.value) || 0;
+    const tipo = document.getElementById('amortTipo')?.value || 'cuota';
+    const esEs = currentLanguage === 'es';
+
+    // Calcular ahorro
+    const saldoSinAmort = calcularSaldoPendiente(d.prestamo, d.interes, d.anos, yr);
+    const amortReal = Math.min(imp, saldoSinAmort);
+    const saldoConAmort = Math.max(0, saldoSinAmort - amortReal);
+
+    let msg = '';
+    if (tipo === 'cuota') {
+        const nuevaCuota = saldoConAmort > 0 ? calcularCuotaHipoteca(saldoConAmort, d.interes, d.anos - yr) : 0;
+        const ahorroCuota = d.cuotaHipoteca - nuevaCuota;
+        const totalSinAmort = d.cuotaHipoteca * d.anos * 12;
+        const totalConAmort = d.cuotaHipoteca * yr * 12 + imp + nuevaCuota * (d.anos - yr) * 12;
+        const ahorroTotal = totalSinAmort - totalConAmort;
+        msg = esEs
+            ? `Amortizando <strong>${fmt(Math.round(amortReal))} €</strong> en el año ${yr}: nueva cuota <strong class="metric-positive">${fmt(Math.round(nuevaCuota))} €/mes</strong> (ahorras <strong class="metric-positive">${fmt(Math.round(ahorroCuota))} €/mes</strong>) · Ahorro total en intereses: <strong class="metric-positive">~${fmt(Math.round(ahorroTotal))} €</strong>`
+            : `Repaying <strong>${fmt(Math.round(amortReal))} €</strong> in year ${yr}: new payment <strong class="metric-positive">${fmt(Math.round(nuevaCuota))} €/mo</strong> (save <strong class="metric-positive">${fmt(Math.round(ahorroCuota))} €/mo</strong>) · Total interest savings: <strong class="metric-positive">~${fmt(Math.round(ahorroTotal))} €</strong>`;
+    } else {
+        // Reducir plazo
+        const cuotaOriginal = d.cuotaHipoteca;
+        const i = d.interes / 100 / 12;
+        let mesesRestantes = 0;
+        if (saldoConAmort > 0 && i > 0) {
+            mesesRestantes = Math.ceil(Math.log(cuotaOriginal / (cuotaOriginal - saldoConAmort * i)) / Math.log(1 + i));
+        }
+        const mesesAhorrados = (d.anos - yr) * 12 - mesesRestantes;
+        const anosAhorrados = Math.floor(mesesAhorrados / 12);
+        const mesesExtra = mesesAhorrados % 12;
+        const ahorroEstimado = Math.round(Math.max(0, imp * (d.interes / 100) * (d.anos - yr) / 2));
+        const extra = mesesExtra > 0 ? (esEs ? ' y ' + mesesExtra + ' meses' : ' and ' + mesesExtra + ' months') : '';
+        msg = esEs
+            ? 'Amortizando <strong>' + fmt(Math.round(amortReal)) + ' €</strong> en el año ' + yr + ' manteniendo cuota: reduces el plazo en <strong class="metric-positive">' + anosAhorrados + ' años' + extra + '</strong> · Ahorro en intereses: <strong class="metric-positive">~' + fmt(ahorroEstimado) + ' €</strong>'
+            : 'Repaying <strong>' + fmt(Math.round(amortReal)) + ' €</strong> in year ' + yr + ' keeping payment: reduces term by <strong class="metric-positive">' + anosAhorrados + ' years' + extra + '</strong> · Est. savings: <strong class="metric-positive">~' + fmt(ahorroEstimado) + ' €</strong>';
+    }
+
+    const res = document.getElementById('amortResultado');
+    if (res) { res.innerHTML = msg; res.style.display = 'block'; }
+
+    renderizarTablaHipoteca(d, yr, imp, tipo);
+};
+
+window.resetAmortizacion = function() {
+    const d = window._hipotecaDatos;
+    if (!d) return;
+    const res = document.getElementById('amortResultado');
+    if (res) res.style.display = 'none';
+    renderizarTablaHipoteca(d, null, 0, 'cuota');
+};
 
 // ============================================================
 // CALCULADORA INVERSA
