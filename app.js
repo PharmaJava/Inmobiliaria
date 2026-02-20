@@ -1910,7 +1910,7 @@ function exportToPDF() {
         // Nota explicativa
         setFont('normal', 7.5, C.grey);
         const notaLines = doc.splitTextToSize(s(esEs
-            ? '* Calculo por biseccion numerica con los parametros actuales: ' + interesPDF + '% de interes, ' + anosPDF + ' anos de hipoteca, ' + alquilerPDF + ' EUR/mes de alquiler y ' + entradaPctDispPDF + '% de entrada.'
+            ? '* Cálculo por bisección numérica con los parámetros actuales: ' + interesPDF + '% de interés, ' + anosPDF + ' años de hipoteca, ' + alquilerPDF + ' EUR/mes de alquiler y ' + entradaPctDispPDF + '% de entrada.'
             : '* Numerical bisection calculation using current parameters: ' + interesPDF + '% interest, ' + anosPDF + '-year mortgage, ' + alquilerPDF + ' EUR/month rent, ' + entradaPctDispPDF + '% down payment.'), CW);
         notaLines.forEach(line => { text(line, ML, y); y += 4.5; });
         y += 4;
@@ -1919,12 +1919,12 @@ function exportToPDF() {
     // ── TABLA DE HIPOTECA EN PDF ──────────────────────────────
     if (datos.financiacionTipo === 'con_hipoteca' && datos.prestamo > 0) {
         newPage();
-        sectionTitle(esEs ? 'Cuadro de Amortizacion Hipotecaria' : 'Mortgage Amortization Schedule');
+        sectionTitle(esEs ? 'Cuadro de Amortización Hipotecaria' : 'Mortgage Amortization Schedule');
 
         // Cabecera resumen
         setFont('normal', 8.5, C.text || C.grey);
         const hipIntro = s(esEs
-            ? 'Prestamo: ' + f(datos.prestamo) + ' EUR · Interes: ' + datos.interes + '% · Plazo: ' + datos.anos + ' anos · Cuota mensual: ' + f(datos.cuotaHipoteca) + ' EUR/mes'
+            ? 'Préstamo: ' + f(datos.prestamo) + ' EUR · Interés: ' + datos.interes + '% · Plazo: ' + datos.anos + ' años · Cuota mensual: ' + f(datos.cuotaHipoteca) + ' EUR/mes'
             : 'Loan: ' + f(datos.prestamo) + ' EUR · Rate: ' + datos.interes + '% · Term: ' + datos.anos + ' years · Monthly: ' + f(datos.cuotaHipoteca) + ' EUR/mo');
         text(hipIntro, ML, y); y += 8;
 
@@ -1952,7 +1952,7 @@ function exportToPDF() {
         const colWH = [16, 26, 28, 28, 28, CW - 136 + ML - ML];
         fillRect(ML, y, CW, 7, C.primaryDark || [15,52,96]);
         setFont('bold', 7, C.white);
-        const hdrH = [esEs?'Año':'Year', esEs?'Cuota/mes':'Pmt/mo', esEs?'Capital':'Principal', esEs?'Intereses':'Interest', esEs?'Amort.Extra':'Extra', esEs?'Saldo':'Balance'];
+        const hdrH = [esEs?'Año':'Year', esEs?'Cuota/mes':'Pmt/mo', esEs?'Capital':'Principal', esEs?'Intereses':'Interest', esEs?'Amort. extra':'Extra', esEs?'Saldo pendiente':'Balance'];
         hdrH.forEach((h, i2) => text(s(h), colsH[i2] + 1, y + 5));
         y += 9;
 
@@ -2018,12 +2018,12 @@ function exportToPDF() {
 
         // Nota
         setFont('normal', 7, C.grey);
-        text(s(esEs ? '* Cuadro de amortizacion Frances (cuota constante). Valores anuales agregados.' : '* French amortization (constant payment). Annual aggregated values.'), ML, y);
+        text(s(esEs ? '* Cuadro de amortización francés (cuota constante). Valores anuales agregados.' : '* French amortization (constant payment). Annual aggregated values.'), ML, y);
         y += 8;
 
         if (tieneAmort) {
             const amortNota = s(esEs
-                ? '* Amortizacion anticipada simulada: ' + f(Math.round(amortImporteVal)) + ' EUR en el ano ' + amortYearVal + ' (reduce ' + (amortTipoVal === 'cuota' ? 'cuota' : 'plazo') + ').'
+                ? '* Amortización anticipada simulada: ' + f(Math.round(amortImporteVal)) + ' EUR en el año ' + amortYearVal + ' (reduce ' + (amortTipoVal === 'cuota' ? 'cuota' : 'plazo') + ').'
                 : '* Early repayment simulated: ' + f(Math.round(amortImporteVal)) + ' EUR in year ' + amortYearVal + ' (reduces ' + (amortTipoVal === 'cuota' ? 'payment' : 'term') + ').');
             text(amortNota, ML, y); y += 8;
         }
@@ -2036,7 +2036,7 @@ function exportToPDF() {
     const comparaciones = [
         { label: esEs ? '>> Tu inversion inmobiliaria' : '>> Your real estate investment', value: datos.rentabilidadAnual },
         { label: esEs ? '   Deposito bancario' : '   Bank deposit',       value: 2.8 },
-        { label: esEs ? '   Bono espanol 10 anos' : '   Spanish 10yr bond',value: 3.2 },
+        { label: esEs ? '   Bono español 10 años' : '   Spanish 10yr bond',value: 3.2 },
         { label: esEs ? '   S&P 500 (media historica)' : '   S&P 500 (historical avg)', value: 10.5 },
         { label: esEs ? '   EURO STOXX 50 (historico)' : '   EURO STOXX 50 (historical)', value: 7.1 },
         { label: esEs ? '   Inmobiliario Espana (media)' : '   Spanish RE avg', value: 5.2 },
@@ -2787,7 +2787,7 @@ window.calcularInversa = function() {
         '<div class="inversa-row inversa-row--highlight"><span><strong>' + labelCF + '</strong></span><strong class="' + cfClass + '">' + fmt(cfReal) + ' €/mes</strong></div>';
 
     nota.textContent = esEs
-        ? "* Calculo basado en: " + interes + "% de interes, " + anos + " anos de hipoteca, " + alquiler + " EUR/mes de alquiler y " + entradaPctDisplay + "% de entrada."
+        ? "* Cálculo basado en: " + interes + "% de interés, " + anos + " años de hipoteca, " + alquiler + " EUR/mes de alquiler y " + entradaPctDisplay + "% de entrada."
         : "* Based on: " + interes + "% interest, " + anos + "-year mortgage, " + alquiler + " EUR/month rent, " + entradaPctDisplay + "% down payment.";
 
     res.style.display = "block";
