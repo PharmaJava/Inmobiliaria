@@ -1048,11 +1048,14 @@ function mostrarResultados(datos) {
             🌟 <strong>${t.excelente_rentabilidad}</strong>
         </div>` : ''}
 
+        <!-- SEMÁFORO VISUAL -->
+        ${generarSemaforoHTML(datos)}
+
         <!-- KPIs PRINCIPALES -->
         <div class="results-grid">
-            <div class="metric-card">
+            <div class="metric-card" data-tooltip-key="inversion">
                 <div class="metric-header">
-                    <div class="metric-title">${t.inversion_inicial}</div>
+                    <div class="metric-title">${t.inversion_inicial} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Suma total que sale de tu bolsillo: entrada + impuestos + gastos + reforma + gastos hipoteca' : 'Total out-of-pocket: down payment + taxes + costs + renovation + mortgage fees'}">ℹ️</span></div>
                     <div class="metric-icon">💰</div>
                 </div>
                 <div class="metric-value">${fmt(datos.inversionInicial)} €</div>
@@ -1061,7 +1064,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="cashflow">
                 <div class="metric-header">
-                    <div class="metric-title">${t.flujo_mensual}</div>
+                    <div class="metric-title">${t.flujo_mensual} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Lo que te queda en el bolsillo cada mes tras pagar hipoteca, gastos e impuestos. Indicador clave para renta pasiva.' : 'What you keep each month after mortgage, costs and taxes. Key indicator for passive income.'}">ℹ️</span></div>
                     <div class="metric-icon">${datos.flujoMensual >= 0 ? '📈' : '📉'}</div>
                 </div>
                 <div class="metric-value ${flujoClass}">${fmt(datos.flujoMensual)} €</div>
@@ -1071,7 +1074,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="roi">
                 <div class="metric-header">
-                    <div class="metric-title">${t.roi_anual}</div>
+                    <div class="metric-title">${t.roi_anual} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Cashflow anual / Capital invertido. Un ROI alto con cashflow negativo es una señal de alerta.' : 'Annual cashflow / Invested capital. High ROI with negative cashflow is a warning sign.'}">ℹ️</span></div>
                     <div class="metric-icon">📊</div>
                 </div>
                 <div class="metric-value ${roiClass}">${datos.roiAnual.toFixed(2)}%</div>
@@ -1081,7 +1084,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="tir">
                 <div class="metric-header">
-                    <div class="metric-title">${t.tir_anualizada}</div>
+                    <div class="metric-title">${t.tir_anualizada} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Rentabilidad anual compuesta incluyendo alquileres + ganancia por venta. >7% supera la media histórica del mercado español.' : 'Compound annual return including rent + sale gain. >7% beats Spanish historical average.'}">ℹ️</span></div>
                     <div class="metric-icon">⚡</div>
                 </div>
                 <div class="metric-value ${rentabilidadClass}">${datos.rentabilidadAnual.toFixed(2)}%</div>
@@ -1091,7 +1094,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="beneficio">
                 <div class="metric-header">
-                    <div class="metric-title">${t.beneficio_total}</div>
+                    <div class="metric-title">${t.beneficio_total} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Flujo acumulado + neto de venta - inversión inicial. El resultado total de tu apuesta.' : 'Accumulated cashflow + net sale - initial investment. The total result of your bet.'}">ℹ️</span></div>
                     <div class="metric-icon">${datos.beneficioTotal >= 0 ? '🎯' : '⚠️'}</div>
                 </div>
                 <div class="metric-value ${beneficioClass}">${fmt(datos.beneficioTotal)} €</div>
@@ -1100,7 +1103,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="neto">
                 <div class="metric-header">
-                    <div class="metric-title">${t.flujo_acumulado}</div>
+                    <div class="metric-title">${t.flujo_acumulado} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Suma de todos los cashflows anuales durante el período de análisis, solo por alquileres.' : 'Sum of all annual cashflows during the analysis period, from rentals only.'}">ℹ️</span></div>
                     <div class="metric-icon">💧</div>
                 </div>
                 <div class="metric-value ${datos.flujoAcumulado >= 0 ? 'metric-positive' : 'metric-negative'}">${fmt(datos.flujoAcumulado)} €</div>
@@ -2811,5 +2814,313 @@ function aceptarCookies() {
 }
 
 // ============================================================
-// COOKIES
+// MEJORA 2: GUARDAR / RECUPERAR ESCENARIOS CON localStorage
+// ============================================================
+const PARAM_IDS = [
+    'precio','tipoVivienda','gastosCompra','reforma',
+    'financiacionTipo','entradaEuros','interes','anos','gastosHipoteca',
+    'alquiler','mesesVacio','incrementoAlquiler','anosAnalisis',
+    'ibi','comunidad','seguro','seguroImpago','mantenimiento',
+    'administracion','incrementoGastos','taxAlquiler',
+    'revalorizacion','gastosVenta','plusvalia','irpfVenta','ccaaSelector'
+];
+
+function leerParametrosActuales() {
+    const params = {};
+    PARAM_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) params[id] = el.value;
+    });
+    return params;
+}
+
+function guardarEscenario() {
+    const nombre = prompt(currentLanguage === 'es'
+        ? 'Nombre para este escenario (ej: Piso Málaga):'
+        : 'Name for this scenario (e.g. Flat London):');
+    if (!nombre || !nombre.trim()) return;
+
+    const key = 'pisorentable_escenarios';
+    const existentes = JSON.parse(localStorage.getItem(key) || '[]');
+    const nuevo = {
+        id: Date.now(),
+        nombre: nombre.trim(),
+        fecha: new Date().toLocaleDateString(currentLanguage === 'es' ? 'es-ES' : 'en-GB'),
+        params: leerParametrosActuales(),
+        resumen: window._lastDatos ? {
+            flujoMensual: window._lastDatos.flujoMensual,
+            rentabilidadAnual: window._lastDatos.rentabilidadAnual,
+            inversionInicial: window._lastDatos.inversionInicial
+        } : null
+    };
+    existentes.push(nuevo);
+    localStorage.setItem(key, JSON.stringify(existentes));
+    renderizarEscenariosGuardados();
+    mostrarToastPersonalizado(currentLanguage === 'es' ? `✅ Escenario "${nuevo.nombre}" guardado` : `✅ Scenario "${nuevo.nombre}" saved`);
+}
+
+function cargarEscenario(id) {
+    const key = 'pisorentable_escenarios';
+    const existentes = JSON.parse(localStorage.getItem(key) || '[]');
+    const esc = existentes.find(e => e.id === id);
+    if (!esc) return;
+
+    PARAM_IDS.forEach(pid => {
+        const el = document.getElementById(pid);
+        if (el && esc.params[pid] !== undefined) el.value = esc.params[pid];
+    });
+    actualizarEntradaSlider();
+    toggleFinanciacionInputs();
+    window.actualizarITPHint && window.actualizarITPHint();
+    calcular();
+    mostrarToastPersonalizado(currentLanguage === 'es' ? `📂 Escenario "${esc.nombre}" cargado` : `📂 Scenario "${esc.nombre}" loaded`);
+}
+
+function eliminarEscenario(id) {
+    const key = 'pisorentable_escenarios';
+    let existentes = JSON.parse(localStorage.getItem(key) || '[]');
+    existentes = existentes.filter(e => e.id !== id);
+    localStorage.setItem(key, JSON.stringify(existentes));
+    renderizarEscenariosGuardados();
+}
+
+function renderizarEscenariosGuardados() {
+    const container = document.getElementById('escenariosGuardadosLista');
+    if (!container) return;
+    const key = 'pisorentable_escenarios';
+    const lista = JSON.parse(localStorage.getItem(key) || '[]');
+    const esEs = currentLanguage === 'es';
+
+    if (lista.length === 0) {
+        container.innerHTML = `<p class="escenarios-empty">${esEs ? 'No hay escenarios guardados aún.' : 'No saved scenarios yet.'}</p>`;
+        return;
+    }
+
+    container.innerHTML = lista.map(esc => {
+        const flujo = esc.resumen ? fmt(esc.resumen.flujoMensual) + ' €/mes' : '—';
+        const tir = esc.resumen ? esc.resumen.rentabilidadAnual.toFixed(2) + '%' : '—';
+        const flujoClass = esc.resumen && esc.resumen.flujoMensual >= 0 ? 'metric-positive' : 'metric-negative';
+        return `
+        <div class="escenario-item">
+            <div class="escenario-info">
+                <div class="escenario-nombre">📁 ${esc.nombre}</div>
+                <div class="escenario-meta">${esc.fecha} · CF: <span class="${flujoClass}">${flujo}</span> · TIR: ${tir}</div>
+            </div>
+            <div class="escenario-acciones">
+                <button class="btn-escenario-cargar" onclick="cargarEscenario(${esc.id})" title="${esEs ? 'Cargar' : 'Load'}">📂</button>
+                <button class="btn-escenario-borrar" onclick="eliminarEscenario(${esc.id})" title="${esEs ? 'Eliminar' : 'Delete'}">🗑️</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function mostrarToastPersonalizado(msg) {
+    let toast = document.getElementById('customToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'customToast';
+        toast.className = 'share-toast';
+        toast.style.cssText = 'position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);transition:opacity 0.4s;z-index:9999;';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => { toast.style.display = 'none'; }, 400); }, 2500);
+}
+
+function toggleEscenariosPanel() {
+    const panel = document.getElementById('escenariosPanel');
+    if (!panel) return;
+    const abierto = panel.classList.toggle('abierto');
+    if (abierto) renderizarEscenariosGuardados();
+}
+
+// ============================================================
+// MEJORA 1: COMPARADOR DE DOS PROPIEDADES
+// ============================================================
+let comparadorVisible = false;
+let comparadorDatos = { a: null, b: null };
+
+function toggleComparador() {
+    const modal = document.getElementById('comparadorModal');
+    if (!modal) return;
+    comparadorVisible = !comparadorVisible;
+    modal.style.display = comparadorVisible ? 'flex' : 'none';
+    if (comparadorVisible) actualizarComparador();
+}
+
+function capturarParaComparador(slot) {
+    if (!window._lastDatos) {
+        mostrarToastPersonalizado(currentLanguage === 'es' ? '⚠️ Primero calcula la inversión' : '⚠️ Calculate first');
+        return;
+    }
+    const nombre = prompt(currentLanguage === 'es'
+        ? `Nombre para esta propiedad (slot ${slot.toUpperCase()}):` 
+        : `Name for this property (slot ${slot.toUpperCase()}):`);
+    if (nombre === null) return;
+    comparadorDatos[slot] = {
+        nombre: nombre.trim() || (currentLanguage === 'es' ? `Propiedad ${slot.toUpperCase()}` : `Property ${slot.toUpperCase()}`),
+        datos: { ...window._lastDatos }
+    };
+    actualizarComparador();
+}
+
+function actualizarComparador() {
+    const body = document.getElementById('comparadorBody');
+    if (!body) return;
+    const esEs = currentLanguage === 'es';
+    const { a, b } = comparadorDatos;
+
+    if (!a && !b) {
+        body.innerHTML = `<p style="text-align:center;color:var(--text-light);padding:2rem;">${esEs ? 'Captura dos propiedades para compararlas.' : 'Capture two properties to compare them.'}</p>`;
+        return;
+    }
+
+    const metrics = [
+        { key: 'inversionInicial', label: esEs ? 'Inversión inicial' : 'Initial investment', fmt: v => fmt(v) + ' €', lowerBetter: true },
+        { key: 'flujoMensual', label: esEs ? 'Cashflow mensual' : 'Monthly cashflow', fmt: v => fmt(v) + ' €/mes', lowerBetter: false },
+        { key: 'roiAnual', label: 'ROI anual', fmt: v => v.toFixed(2) + '%', lowerBetter: false },
+        { key: 'rentabilidadAnual', label: 'TIR estimada', fmt: v => v.toFixed(2) + '%', lowerBetter: false },
+        { key: 'beneficioTotal', label: esEs ? 'Beneficio total' : 'Total profit', fmt: v => fmt(v) + ' €', lowerBetter: false },
+        { key: 'precioVentaNeto', label: esEs ? 'Neto al vender' : 'Net on sale', fmt: v => fmt(v) + ' €', lowerBetter: false },
+        { key: 'flujoAcumulado', label: esEs ? 'Flujo acumulado' : 'Accumulated cashflow', fmt: v => fmt(v) + ' €', lowerBetter: false },
+    ];
+
+    const renderSlot = (slot, data) => {
+        if (!data) return `
+            <div class="comp-slot comp-slot--empty">
+                <div class="comp-slot-title">${esEs ? 'Propiedad' : 'Property'} ${slot.toUpperCase()}</div>
+                <button class="btn btn-primary" style="margin-top:1rem;" onclick="capturarParaComparador('${slot}')">
+                    ${esEs ? '📷 Capturar análisis actual' : '📷 Capture current analysis'}
+                </button>
+            </div>`;
+        return `
+            <div class="comp-slot">
+                <div class="comp-slot-title">${data.nombre}</div>
+                <button class="btn btn-share btn-sm" onclick="capturarParaComparador('${slot}')" style="margin-bottom:0.75rem;font-size:0.75rem;">🔄 ${esEs ? 'Reemplazar' : 'Replace'}</button>
+            </div>`;
+    };
+
+    const aVal = (key) => a ? a.datos[key] : null;
+    const bVal = (key) => b ? b.datos[key] : null;
+
+    const winnerClass = (va, vb, lowerBetter) => {
+        if (va === null || vb === null) return ['', ''];
+        const aWins = lowerBetter ? va < vb : va > vb;
+        const tie = Math.abs(va - vb) < 0.01;
+        if (tie) return ['comp-tie', 'comp-tie'];
+        return aWins ? ['comp-winner', 'comp-loser'] : ['comp-loser', 'comp-winner'];
+    };
+
+    const rows = metrics.map(m => {
+        const va = aVal(m.key);
+        const vb = bVal(m.key);
+        const [ca, cb] = winnerClass(va, vb, m.lowerBetter);
+        return `
+        <tr>
+            <td class="comp-metric-label">${m.label}</td>
+            <td class="comp-value ${ca}">${va !== null ? m.fmt(va) : '—'}</td>
+            <td class="comp-value ${cb}">${vb !== null ? m.fmt(vb) : '—'}</td>
+        </tr>`;
+    }).join('');
+
+    body.innerHTML = `
+    <div class="comp-header-row">
+        ${renderSlot('a', a)}
+        <div class="comp-vs">VS</div>
+        ${renderSlot('b', b)}
+    </div>
+    <table class="comp-table">
+        <thead>
+            <tr>
+                <th>${esEs ? 'Métrica' : 'Metric'}</th>
+                <th>${a ? a.nombre : 'A'}</th>
+                <th>${b ? b.nombre : 'B'}</th>
+            </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+    </table>
+    <p class="comp-nota">🏆 ${esEs ? 'Verde = mejor resultado · Rojo = peor resultado' : 'Green = better result · Red = worse result'}</p>`;
+}
+
+// ============================================================
+// MEJORA 3: SEMÁFORO VISUAL
+// ============================================================
+function calcularSemaforo(datos) {
+    const puntos = [];
+    let total = 0;
+
+    if (datos.flujoMensual > 200) { puntos.push({ ok: 'green', label: `Cashflow > 200 €/mes ✅` }); total += 3; }
+    else if (datos.flujoMensual >= 0) { puntos.push({ ok: 'yellow', label: `Cashflow positivo pero bajo ⚠️` }); total += 1.5; }
+    else { puntos.push({ ok: 'red', label: `Cashflow negativo (${fmt(datos.flujoMensual)} €/mes) ❌` }); }
+
+    if (datos.rentabilidadAnual > 7) { puntos.push({ ok: 'green', label: `TIR excelente (${datos.rentabilidadAnual.toFixed(1)}%) ✅` }); total += 3; }
+    else if (datos.rentabilidadAnual >= 4) { puntos.push({ ok: 'yellow', label: `TIR moderada (${datos.rentabilidadAnual.toFixed(1)}%) ⚠️` }); total += 1.5; }
+    else { puntos.push({ ok: 'red', label: `TIR baja (${datos.rentabilidadAnual.toFixed(1)}%) ❌` }); }
+
+    if (datos.roiAnual > 5) { puntos.push({ ok: 'green', label: `ROI sólido (${datos.roiAnual.toFixed(1)}%) ✅` }); total += 2; }
+    else if (datos.roiAnual >= 3) { puntos.push({ ok: 'yellow', label: `ROI moderado (${datos.roiAnual.toFixed(1)}%) ⚠️` }); total += 1; }
+    else { puntos.push({ ok: 'red', label: `ROI bajo (${datos.roiAnual.toFixed(1)}%) ❌` }); }
+
+    if (datos.beneficioTotal > 0) { puntos.push({ ok: 'green', label: `Beneficio total positivo ✅` }); total += 2; }
+    else { puntos.push({ ok: 'red', label: `Beneficio total negativo ❌` }); }
+
+    const max = 10;
+    const pct = Math.min(100, (total / max) * 100);
+    let nivel, color, emoji;
+    if (pct >= 70) { nivel = currentLanguage === 'es' ? 'Inversión atractiva' : 'Attractive investment'; color = '#10b981'; emoji = '🟢'; }
+    else if (pct >= 40) { nivel = currentLanguage === 'es' ? 'Inversión moderada' : 'Moderate investment'; color = '#f59e0b'; emoji = '🟡'; }
+    else { nivel = currentLanguage === 'es' ? 'Inversión con riesgos' : 'Risky investment'; color = '#ef4444'; emoji = '🔴'; }
+
+    return { puntos, pct, nivel, color, emoji };
+}
+
+function generarSemaforoHTML(datos) {
+    const s = calcularSemaforo(datos);
+    const esEs = currentLanguage === 'es';
+    const dotColor = (ok) => ok === 'green' ? '#10b981' : ok === 'yellow' ? '#f59e0b' : '#ef4444';
+    return `
+    <div class="semaforo-card">
+        <div class="semaforo-header">
+            <span class="semaforo-emoji">${s.emoji}</span>
+            <div>
+                <div class="semaforo-nivel" style="color:${s.color}">${s.nivel}</div>
+                <div class="semaforo-sub">${esEs ? 'Evaluación rápida de la inversión' : 'Quick investment assessment'}</div>
+            </div>
+            <div class="semaforo-score" style="color:${s.color}">${Math.round(s.pct)}<span>/100</span></div>
+        </div>
+        <div class="semaforo-bar-bg">
+            <div class="semaforo-bar-fill" style="width:${s.pct}%;background:${s.color}"></div>
+        </div>
+        <ul class="semaforo-lista">
+            ${s.puntos.map(p => `<li><span class="semaforo-dot" style="background:${dotColor(p.ok)}"></span>${p.label}</li>`).join('')}
+        </ul>
+        <div class="semaforo-nota">${esEs ? '* Evaluación orientativa basada en umbrales del mercado español.' : '* Indicative assessment based on Spanish market benchmarks.'}</div>
+    </div>`;
+}
+
+window.actualizarITPHint = function() {
+    const tipoViviendaSel = document.getElementById('tipoVivienda');
+    const itpHint = document.getElementById('itpHint');
+    const ccaaGroup = document.getElementById('ccaaGroup');
+    const ccaaSelector = document.getElementById('ccaaSelector');
+    if (!itpHint) return;
+    const t = translations[currentLanguage];
+    const tipoVivienda = tipoViviendaSel ? tipoViviendaSel.value : 'segunda';
+    if (tipoVivienda === 'nueva') {
+        itpHint.textContent = t.itp_hint_nueva;
+        if (ccaaGroup) ccaaGroup.style.display = 'none';
+    } else {
+        if (ccaaGroup) ccaaGroup.style.display = 'block';
+        if (ccaaSelector && ccaaSelector.value) {
+            itpHint.textContent = t.itp_hint_ccaa;
+        } else {
+            itpHint.textContent = t.itp_hint_default;
+        }
+    }
+};
+
+// ============================================================
+// FIN MEJORAS
 // ============================================================
