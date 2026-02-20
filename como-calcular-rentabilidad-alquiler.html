@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Aprende a calcular la rentabilidad de un piso de alquiler en España paso a paso: rentabilidad bruta, neta, ROI, TIR y cashflow. Con fórmulas y ejemplos reales."/>
+    <meta name="keywords" content="calcular rentabilidad piso alquiler, ROI inversión inmobiliaria, TIR piso alquiler, cashflow inmobiliario, rentabilidad bruta neta"/>
+    <link rel="canonical" href="https://pisorentable.org/blog/como-calcular-rentabilidad-alquiler.html"/>
+    <link rel="icon" type="image/png" href="https://pisorentable.org/piso.png"/>
+    <title>Cómo Calcular la Rentabilidad de un Piso de Alquiler | PisoRentable.org</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="../style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Cómo calcular la rentabilidad de un piso de alquiler paso a paso",
+        "description": "Guía completa: rentabilidad bruta, neta, ROI, TIR y cashflow con fórmulas y ejemplos reales.",
+        "author": { "@type": "Organization", "name": "PisoRentable.org" },
+        "publisher": { "@type": "Organization", "name": "PisoRentable.org", "url": "https://pisorentable.org" },
+        "datePublished": "2025-01-15",
+        "dateModified": "2025-02-20",
+        "url": "https://pisorentable.org/blog/como-calcular-rentabilidad-alquiler.html"
+    }
+    </script>
+    <style>
+        .article-wrap { max-width: 760px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+        .article-hero { background: linear-gradient(135deg,#0ea5e9,#6366f1); padding: 2.5rem 1.5rem 2rem; color: #fff; }
+        .article-back { display:inline-flex;align-items:center;gap:0.4rem;color:rgba(255,255,255,0.75);font-size:0.85rem;text-decoration:none;margin-bottom:1rem; }
+        .article-back:hover { color:#fff; }
+        .article-badge { font-size:0.72rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;background:rgba(255,255,255,0.2);border-radius:99px;padding:0.25rem 0.75rem;display:inline-block;margin-bottom:0.75rem; }
+        .article-hero h1 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 800; line-height: 1.3; margin-bottom: 0.5rem; }
+        .article-meta { font-size: 0.82rem; opacity: 0.75; }
+        .article-body { font-size: 1rem; line-height: 1.75; color: var(--text-main, #1e293b); }
+        .article-body h2 { font-size: 1.35rem; font-weight: 700; margin: 2rem 0 0.75rem; }
+        .article-body h3 { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
+        .article-body p { margin-bottom: 1rem; }
+
+        .formula-box {
+            background: #0f172a;
+            color: #10b981;
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            margin: 1.25rem 0;
+            overflow-x: auto;
+        }
+        .ejemplo-box {
+            background: linear-gradient(135deg,#f0fdf4,#ecfdf5);
+            border: 1.5px solid #6ee7b7;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin: 1.25rem 0;
+        }
+        .ejemplo-box strong { color: #065f46; }
+        .article-callout { background: linear-gradient(135deg,#f0f9ff,#ede9fe); border-left: 4px solid #6366f1; border-radius: 0 0.75rem 0.75rem 0; padding: 1rem 1.25rem; margin: 1.5rem 0; }
+        .metricas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+        .metrica-card { background: var(--card-bg,#fff); border: 1.5px solid var(--border-color,#e2e8f0); border-radius: 0.75rem; padding: 1rem; text-align: center; }
+        .metrica-card .icon { font-size: 1.75rem; margin-bottom: 0.4rem; }
+        .metrica-card .nombre { font-weight: 700; font-size: 0.92rem; margin-bottom: 0.25rem; }
+        .metrica-card .desc { font-size: 0.78rem; color: var(--text-light,#64748b); }
+        .article-cta { background: linear-gradient(135deg,#0ea5e9,#6366f1); border-radius: 1rem; padding: 1.5rem; text-align: center; color: #fff; margin-top: 2rem; }
+        .article-cta h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .article-cta p { font-size: 0.88rem; opacity: 0.88; margin-bottom: 1rem; }
+        .article-cta a { background: #fff; color: #6366f1; border-radius: 0.75rem; padding: 0.7rem 1.75rem; font-weight: 700; text-decoration: none; display: inline-block; }
+    </style>
+</head>
+<body>
+<div class="article-hero">
+    <a class="article-back" href="/blog.html">← Blog</a>
+    <div class="article-badge">Guía</div>
+    <h1>📊 Cómo Calcular la Rentabilidad de un Piso de Alquiler Paso a Paso</h1>
+    <div class="article-meta">📅 Actualizado: febrero 2025 · ⏱ 8 minutos de lectura</div>
+</div>
+
+<div class="article-wrap">
+    <div class="article-body">
+
+        <p>Antes de comprar cualquier piso como inversión, necesitas saber si los números cuadran. Hay cuatro métricas clave que todo inversor inmobiliario debe conocer: <strong>rentabilidad bruta, rentabilidad neta, ROI y TIR</strong>. Cada una cuenta una parte diferente de la historia.</p>
+
+        <div class="metricas-grid">
+            <div class="metrica-card"><div class="icon">📈</div><div class="nombre">Rentabilidad Bruta</div><div class="desc">Rápida y aproximada. Buena para descartar</div></div>
+            <div class="metrica-card"><div class="icon">💧</div><div class="nombre">Cashflow</div><div class="desc">Lo que entra en tu bolsillo cada mes</div></div>
+            <div class="metrica-card"><div class="icon">📊</div><div class="nombre">ROI</div><div class="desc">Retorno sobre tu capital invertido</div></div>
+            <div class="metrica-card"><div class="icon">⚡</div><div class="nombre">TIR</div><div class="desc">La rentabilidad compuesta total real</div></div>
+        </div>
+
+        <h2>1. Rentabilidad bruta: el primer filtro</h2>
+
+        <p>La rentabilidad bruta es el indicador más rápido. No tiene en cuenta ningún gasto ni impuesto, por lo que solo sirve para hacer una primera criba entre muchas propiedades.</p>
+
+        <div class="formula-box">
+Rent. bruta = (Alquiler mensual × 12) / Precio de compra × 100
+
+Ejemplo: (700 € × 12) / 120.000 € × 100 = 7%</div>
+
+        <p>Una rentabilidad bruta por debajo del 5-6% en España raramente dará resultado positivo una vez descontados los gastos reales. No pierdas tiempo analizando en profundidad propiedades que no pasen este filtro.</p>
+
+        <h2>2. Rentabilidad neta: la que de verdad importa</h2>
+
+        <p>La rentabilidad neta descuenta todos los gastos operativos anuales del inmueble antes de calcular el porcentaje. En España, la diferencia entre bruta y neta puede ser de 2-3 puntos porcentuales.</p>
+
+        <div class="formula-box">
+Rent. neta = (Ingresos anuales - Gastos anuales) / Precio compra × 100
+
+Gastos habituales:
+  · IBI: 380 €/año
+  · Comunidad: 55 €/mes × 12 = 660 €
+  · Seguro hogar: 220 €/año
+  · Mantenimiento: 400 €/año
+  · Meses vacíos: p.ej. 0.5 mes/año = -292 €
+  
+Ejemplo:
+  Ingresos: 700 × 11.5 meses = 8.050 €
+  Gastos: 1.660 €
+  Neto: 6.390 €
+  Rent. neta: 6.390 / 120.000 × 100 = 5.3%</div>
+
+        <h2>3. Cashflow mensual: lo que realmente entra en tu bolsillo</h2>
+
+        <p>Si has financiado la compra con hipoteca, el cashflow es el indicador más importante para el día a día. Es la diferencia entre lo que ingresas y todo lo que pagas cada mes: hipoteca, gastos e impuestos.</p>
+
+        <div class="formula-box">
+Cashflow mensual = Alquiler neto/mes - Cuota hipoteca/mes - Impuestos/mes
+
+Ejemplo (hipoteca 100.000 € al 3.5% en 25 años = 500 €/mes):
+  Ingresos: 700 €/mes × (11.5/12) = 671 €
+  - Hipoteca: 500 €
+  - Gastos fijos: 138 €/mes
+  - Impuestos (19%): ~10 €/mes
+  = Cashflow: ~23 €/mes</div>
+
+        <div class="ejemplo-box">
+            <strong>🏠 Ejemplo real: piso de 95.000 € en ciudad mediana</strong><br><br>
+            Alquiler: 700 €/mes · Hipoteca 76.000 € al 3.2% en 25 años (cuota: 370 €/mes)<br>
+            Gastos fijos anuales: 1.600 € · Meses vacíos: 0.5<br><br>
+            <strong>Rentabilidad bruta:</strong> 8.8% · <strong>Neta:</strong> 6.5% · <strong>Cashflow:</strong> +189 €/mes · <strong>TIR estimada:</strong> 9.2%
+        </div>
+
+        <h2>4. TIR: la métrica del largo plazo</h2>
+
+        <p>La <strong>Tasa Interna de Retorno (TIR)</strong> es la métrica más completa y también la más compleja. Tiene en cuenta todos los flujos de caja durante el período de análisis y el valor de la venta final, dando como resultado la rentabilidad anual compuesta real de tu inversión.</p>
+
+        <p>Una TIR superior al 6-7% en España significa que tu inversión inmobiliaria supera la rentabilidad histórica media del mercado. La TIR es el número con el que debes comparar alternativas como fondos indexados o REITs.</p>
+
+        <div class="article-callout">
+            <p>⚡ <strong>La TIR no se puede calcular a mano fácilmente</strong>, necesita iterar numéricamente. Nuestra calculadora la computa automáticamente proyectando todos los flujos año a año y el valor de venta estimado al final del período.</p>
+        </div>
+
+        <h2>¿Qué rentabilidad mínima buscar en España en 2025?</h2>
+
+        <p>Con los tipos de interés actuales, los umbrales orientativos son:</p>
+        <ul>
+            <li><strong>Rentabilidad bruta &gt; 7%</strong>: mínimo para que los números funcionen con hipoteca</li>
+            <li><strong>Cashflow &gt; 0 €/mes</strong>: si quieres que el alquiler se autofinancie desde el día 1</li>
+            <li><strong>TIR &gt; 6%</strong>: para que la inversión tenga sentido frente a alternativas financieras</li>
+            <li><strong>TIR &gt; 10%</strong>: inversión excelente, poco habitual en grandes ciudades</li>
+        </ul>
+
+        <div class="article-cta">
+            <h3>Calcula todas estas métricas automáticamente</h3>
+            <p>Introduce los datos de tu piso y obtén rentabilidad bruta, neta, cashflow, ROI, TIR y proyección año a año en segundos.</p>
+            <a href="/">🧮 Ir a la Calculadora Gratis</a>
+        </div>
+
+    </div>
+
+    <footer style="text-align:center;padding:2rem 0;color:#94a3b8;font-size:0.8rem;margin-top:1rem;">
+        <a href="/blog.html" style="color:#94a3b8;">← Blog</a> · 
+        <a href="/" style="color:#94a3b8;">Calculadora</a> · 
+        <a href="/privacidad.html" style="color:#94a3b8;">Privacidad</a>
+    </footer>
+</div>
+</body>
+</html>
