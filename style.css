@@ -1296,26 +1296,12 @@ body {
 }
 
 .detail-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: baseline;
-    gap: 0.75rem;
-    padding: 0.6rem 0;
-    font-size: 0.95rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.55rem 0;
+    font-size: 1rem;
     border-bottom: 1px solid var(--light);
-    line-height: 1.4;
-}
-
-.detail-row span:first-child {
-    min-width: 0;          /* permite que el texto haga wrap sin romper el layout */
-}
-
-.detail-row span:last-child {
-    text-align: right;
-    white-space: nowrap;   /* el número nunca se rompe */
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums; /* dígitos de ancho fijo */
 }
 
 .detail-row:last-child {
@@ -1324,7 +1310,7 @@ body {
 
 .detail-row.total {
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     padding-top: 0.75rem;
     margin-top: 0.25rem;
     border-top: 2px solid var(--border);
@@ -2243,45 +2229,25 @@ html.dark .metric-tooltip-popup {
 
 /* ── Header controls (dark toggle + lang selector) ── */
 .header-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
+    display: flex; align-items: center; gap: 0.5rem;
+    position: absolute; top: 1.25rem; right: 1.25rem;
 }
 .dark-mode-toggle {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 8px;
-    padding: 0.4rem 0.65rem;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    line-height: 1;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px; padding: 0.4rem 0.65rem; font-size: 1rem;
+    cursor: pointer; transition: background 0.2s; line-height: 1;
 }
 .dark-mode-toggle:hover { background: rgba(255,255,255,0.25); }
 
 /* ── Gráfico evolución temporal ── */
-.line-chart-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.25rem;
-    margin-bottom: 1.25rem;
-    box-shadow: var(--shadow);
-}
+.line-chart-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
 .line-chart-title { font-weight: 700; font-size: 0.95rem; color: var(--dark); margin-bottom: 1rem; font-family: 'DM Sans', sans-serif; }
 .line-chart-wrap { height: 260px; position: relative; }
 
-/* ── Tooltips en métricas ── */
+/* ── Tooltips métricas ── */
 [data-tooltip-key] { cursor: help; position: relative; }
 [data-tooltip-key]::after { content: ' ⓘ'; font-size: 0.75rem; opacity: 0.5; position: absolute; top: 0.6rem; right: 0.6rem; pointer-events: none; }
-.metric-tooltip-popup {
-    position: absolute; z-index: 8000; background: var(--dark); color: #f1f5f9;
-    font-size: 0.8rem; line-height: 1.5; padding: 0.75rem 1rem; border-radius: 10px;
-    max-width: 300px; box-shadow: var(--shadow-xl); pointer-events: none; animation: tooltipFade 0.15s ease;
-}
+.metric-tooltip-popup { position: absolute; z-index: 8000; background: var(--dark); color: #f1f5f9; font-size: 0.8rem; line-height: 1.5; padding: 0.75rem 1rem; border-radius: 10px; max-width: 300px; box-shadow: var(--shadow-xl); pointer-events: none; animation: tooltipFade 0.15s ease; }
 @keyframes tooltipFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ── Calculadora inversa ── */
@@ -2303,7 +2269,111 @@ html.dark .metric-tooltip-popup {
 .inversa-row--highlight { background: rgba(16,185,129,0.06); border-top: 2px solid var(--success) !important; font-size: 0.95rem; padding: 0.8rem 0.9rem !important; }
 .inversa-nota { font-size: 0.72rem; color: var(--text-light); padding: 0.4rem 0.9rem 0.6rem; border-top: 1px solid var(--border); }
 
-/* ── Dark mode ── */
+/* ============================================================
+   TABLA DE HIPOTECA CON AMORTIZACIONES
+   ============================================================ */
+.hipoteca-card { margin-bottom: 1.25rem; }
+
+.hipoteca-intro {
+    font-size: 0.88rem;
+    color: var(--text);
+    background: rgba(102, 126, 234, 0.06);
+    border: 1px solid rgba(102, 126, 234, 0.15);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+}
+
+.amort-controls {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.amort-section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.85rem;
+}
+
+.amort-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.amort-field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.35rem;
+}
+
+.amort-field .form-input,
+.amort-field .form-select {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+}
+
+.amort-field--btn {
+    display: flex;
+    flex-direction: column;
+}
+
+.amort-field--btn > div {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.amort-resultado {
+    margin-top: 0.85rem;
+    padding: 0.75rem 1rem;
+    background: rgba(16, 185, 129, 0.07);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+.hipoteca-row-amort {
+    background: rgba(245, 158, 11, 0.06) !important;
+}
+
+.amort-badge {
+    display: inline-block;
+    background: rgba(245, 158, 11, 0.15);
+    color: #92400e;
+    border-radius: 6px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+}
+
+.hipoteca-tfoot td {
+    background: var(--dark);
+    color: var(--white) !important;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.9rem;
+}
+
+/* Dark mode tabla hipoteca */
+html.dark .hipoteca-intro { background: rgba(129,140,248,0.08); border-color: rgba(129,140,248,0.2); }
+html.dark .amort-controls { background: #1e293b; border-color: #334155; }
+html.dark .amort-resultado { background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.2); }
+html.dark .amort-badge { background: rgba(251,191,36,0.15); color: #fbbf24; }
+html.dark .hipoteca-row-amort { background: rgba(251,191,36,0.04) !important; }
+
+/* ── Dark mode general ── */
 html.dark {
     --primary: #818cf8; --primary-dark: #6366f1; --secondary: #22d3ee;
     --success: #34d399; --danger: #f87171; --warning: #fbbf24;
@@ -2317,7 +2387,7 @@ html.dark {
 }
 html.dark body { color: var(--text); }
 html.dark .glass-card, html.dark .detail-card, html.dark .chart-card,
-html.dark .line-chart-card, html.dark .inverse-calc-card,
+html.dark .line-chart-card, html.dark .inverse-calc-card, html.dark .hipoteca-card,
 html.dark .projection-table-container { background: #0f172a; border-color: #334155; }
 html.dark .nav-tabs { background: #1e293b; }
 html.dark .nav-tab.active { background: #0f172a; }
