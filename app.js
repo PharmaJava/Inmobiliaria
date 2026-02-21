@@ -303,6 +303,137 @@ const translations = {
 let currentLanguage = 'es';
 
 // ============================================================
+// BASE DE DATOS: PRECIO €/m² POR PROVINCIA (CP prefix 2 dígitos)
+// Fuente: Tinsa/INE estimaciones 2025
+// ============================================================
+const PROVINCIA_DATA = {
+    '01': { nombre: 'Álava / Vitoria',        precioM2: 2200 },
+    '02': { nombre: 'Albacete',               precioM2: 900  },
+    '03': { nombre: 'Alicante',               precioM2: 1650 },
+    '04': { nombre: 'Almería',                precioM2: 1050 },
+    '05': { nombre: 'Ávila',                  precioM2: 800  },
+    '06': { nombre: 'Badajoz',                precioM2: 750  },
+    '07': { nombre: 'Baleares',               precioM2: 3500 },
+    '08': { nombre: 'Barcelona',              precioM2: 3800 },
+    '09': { nombre: 'Burgos',                 precioM2: 1100 },
+    '10': { nombre: 'Cáceres',                precioM2: 750  },
+    '11': { nombre: 'Cádiz',                  precioM2: 1400 },
+    '12': { nombre: 'Castellón',              precioM2: 1050 },
+    '13': { nombre: 'Ciudad Real',            precioM2: 700  },
+    '14': { nombre: 'Córdoba',                precioM2: 1000 },
+    '15': { nombre: 'A Coruña',               precioM2: 1450 },
+    '16': { nombre: 'Cuenca',                 precioM2: 650  },
+    '17': { nombre: 'Girona',                 precioM2: 2100 },
+    '18': { nombre: 'Granada',                precioM2: 1350 },
+    '19': { nombre: 'Guadalajara',            precioM2: 1200 },
+    '20': { nombre: 'Gipuzkoa / San Sebastián', precioM2: 3800 },
+    '21': { nombre: 'Huelva',                 precioM2: 900  },
+    '22': { nombre: 'Huesca',                 precioM2: 950  },
+    '23': { nombre: 'Jaén',                   precioM2: 700  },
+    '24': { nombre: 'León',                   precioM2: 950  },
+    '25': { nombre: 'Lleida',                 precioM2: 1050 },
+    '26': { nombre: 'La Rioja / Logroño',     precioM2: 1200 },
+    '27': { nombre: 'Lugo',                   precioM2: 850  },
+    '28': { nombre: 'Madrid',                 precioM2: 4100 },
+    '29': { nombre: 'Málaga',                 precioM2: 2600 },
+    '30': { nombre: 'Murcia',                 precioM2: 1100 },
+    '31': { nombre: 'Navarra / Pamplona',     precioM2: 1850 },
+    '32': { nombre: 'Ourense',                precioM2: 850  },
+    '33': { nombre: 'Asturias / Oviedo',      precioM2: 1350 },
+    '34': { nombre: 'Palencia',               precioM2: 800  },
+    '35': { nombre: 'Las Palmas (Gran Canaria)', precioM2: 1950 },
+    '36': { nombre: 'Pontevedra / Vigo',      precioM2: 1600 },
+    '37': { nombre: 'Salamanca',              precioM2: 1100 },
+    '38': { nombre: 'Santa Cruz de Tenerife', precioM2: 1700 },
+    '39': { nombre: 'Cantabria / Santander',  precioM2: 1700 },
+    '40': { nombre: 'Segovia',                precioM2: 900  },
+    '41': { nombre: 'Sevilla',                precioM2: 1850 },
+    '42': { nombre: 'Soria',                  precioM2: 650  },
+    '43': { nombre: 'Tarragona',              precioM2: 1500 },
+    '44': { nombre: 'Teruel',                 precioM2: 650  },
+    '45': { nombre: 'Toledo',                 precioM2: 900  },
+    '46': { nombre: 'Valencia',               precioM2: 2200 },
+    '47': { nombre: 'Valladolid',             precioM2: 1150 },
+    '48': { nombre: 'Bizkaia / Bilbao',       precioM2: 2900 },
+    '49': { nombre: 'Zamora',                 precioM2: 700  },
+    '50': { nombre: 'Zaragoza',               precioM2: 1500 },
+    '51': { nombre: 'Ceuta',                  precioM2: 1100 },
+    '52': { nombre: 'Melilla',                precioM2: 1000 },
+};
+// ============================================================
+// LÓGICA DE REFERENCIA DE MERCADO
+// ============================================================
+let _mercadoPrecioManual = false;
+
+function actualizarMercado() {
+    const cpEl      = document.getElementById('codigoPostal');
+    const precioEl  = document.getElementById('precioRefM2');
+    const supEl     = document.getElementById('superficieM2');
+    const resultado = document.getElementById('mercadoResultado');
+    const card      = document.getElementById('mercadoCard');
+
+    if (!cpEl) return;
+
+    const cp     = cpEl.value.trim();
+    const prefix = cp.slice(0, 2);
+    const prov   = (prefix.length === 2) ? PROVINCIA_DATA[prefix] : null;
+
+    // ── 1. Mostrar tarjeta de provincia y rellenar €/m² automáticamente ──
+    if (prov) {
+        // Mostrar tarjeta con datos de la provincia
+        if (card) {
+            card.style.display = 'block';
+            const provEl = document.getElementById('mercadoCardProvincia');
+            const m2El   = document.getElementById('mercadoCardPrecioM2');
+            if (provEl) provEl.textContent = '📍 ' + prov.nombre;
+            if (m2El)   m2El.textContent   = prov.precioM2.toLocaleString('es-ES') + ' €/m²';
+        }
+        // Autorellenar campo editable si el usuario no lo ha tocado
+        if (precioEl && !_mercadoPrecioManual) {
+            precioEl.value = prov.precioM2;
+        }
+    } else {
+        if (card) card.style.display = 'none';
+        if (precioEl && !_mercadoPrecioManual) precioEl.value = '';
+    }
+
+    // ── 2. Panel de comparativa (necesita CP + superficie) ──
+    const precioM2   = precioEl ? (parseFloat(precioEl.value) || 0) : (prov ? prov.precioM2 : 0);
+    const superficie = parseFloat(supEl ? supEl.value : 0) || 0;
+    const precio     = parseFloat((document.getElementById('precio') || {}).value) || 0;
+    const descuento  = parseFloat((document.getElementById('descuentoOferta') || {}).value) || 10;
+
+    if (!resultado) return;
+
+    if (precioM2 > 0 && superficie > 0) {
+        const valorMercado = precioM2 * superficie;
+        const diferencia   = precio - valorMercado;
+        const difPct       = valorMercado > 0 ? (diferencia / valorMercado) * 100 : 0;
+        const oferta       = precio * (1 - descuento / 100);
+
+        document.getElementById('mrValorMercado').textContent = fmt(Math.round(valorMercado)) + ' €';
+
+        const vsEl = document.getElementById('mrVsTexto');
+        if (Math.abs(difPct) < 2) {
+            vsEl.textContent = '≈ En línea con el mercado';
+            vsEl.className   = 'metric-warning';
+        } else if (diferencia > 0) {
+            vsEl.textContent = '+' + fmt(Math.round(diferencia)) + ' € por encima (+' + difPct.toFixed(1) + '%)';
+            vsEl.className   = 'metric-negative';
+        } else {
+            vsEl.textContent = fmt(Math.round(diferencia)) + ' € por debajo (' + difPct.toFixed(1) + '%)';
+            vsEl.className   = 'metric-positive';
+        }
+
+        document.getElementById('mrOferta').textContent = fmt(Math.round(oferta)) + ' €';
+        document.getElementById('mrAhorro').textContent = fmt(Math.round(precio - oferta)) + ' €';
+        resultado.style.display = 'block';
+    } else {
+        resultado.style.display = 'none';
+    }
+}
+
+// ============================================================
 // DISCLAIMER
 // ============================================================
 // ============================================================
@@ -680,7 +811,7 @@ function calcular() {
         // Renderizar gráficos y tabla hipoteca DESPUÉS de inyectar el HTML
         requestAnimationFrame(() => {
             renderizarDoughnut(datos);
-            renderizarLineChart(datos);
+            // lineChart se renderiza al abrir su colapsable (toggleCol)
             if (financiacionTipo === 'con_hipoteca') renderizarTablaHipoteca(datos, null, 0, 'cuota');
         });
         actualizarResumenFlotante(datos);
@@ -859,6 +990,45 @@ function renderizarDoughnut(datos) {
         `).join('');
     }
 }
+
+// ============================================================
+// HELPER — sección colapsable
+// startOpen: true = visible por defecto, false = cerrado por defecto
+// ============================================================
+function colapsable(id, titulo, contenidoHTML, startOpen = false) {
+    const openClass = startOpen ? ' col-open' : '';
+    return `
+    <div class="col-section${openClass}" id="col-${id}">
+        <button class="col-header" onclick="toggleCol('${id}')" type="button" aria-expanded="${startOpen}">
+            <span class="col-title">${titulo}</span>
+            <span class="col-chevron">▾</span>
+        </button>
+        <div class="col-body">
+            <div class="col-inner">${contenidoHTML}</div>
+        </div>
+    </div>`;
+}
+
+window.toggleCol = function(id) {
+    const sec = document.getElementById('col-' + id);
+    if (!sec) return;
+    const isOpen = sec.classList.contains('col-open');
+    sec.classList.toggle('col-open', !isOpen);
+    const btn = sec.querySelector('.col-header');
+    if (btn) btn.setAttribute('aria-expanded', String(!isOpen));
+
+    // Si se acaba de abrir y contiene canvas → re-renderizar gráficos
+    if (!isOpen) {
+        const lineCanvas = sec.querySelector('#lineChart');
+        const doughnutCanvas = sec.querySelector('#doughnutChart');
+        if (lineCanvas && window._lastDatos) {
+            requestAnimationFrame(() => renderizarLineChart(window._lastDatos));
+        }
+        if (doughnutCanvas && window._lastDatos) {
+            requestAnimationFrame(() => renderizarDoughnut(window._lastDatos));
+        }
+    }
+};
 
 // ============================================================
 // MOSTRAR RESULTADOS
@@ -1048,14 +1218,11 @@ function mostrarResultados(datos) {
             🌟 <strong>${t.excelente_rentabilidad}</strong>
         </div>` : ''}
 
-        <!-- SEMÁFORO VISUAL -->
-        ${generarSemaforoHTML(datos)}
-
         <!-- KPIs PRINCIPALES -->
         <div class="results-grid">
-            <div class="metric-card" data-tooltip-key="inversion">
+            <div class="metric-card">
                 <div class="metric-header">
-                    <div class="metric-title">${t.inversion_inicial} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Suma total que sale de tu bolsillo: entrada + impuestos + gastos + reforma + gastos hipoteca' : 'Total out-of-pocket: down payment + taxes + costs + renovation + mortgage fees'}">ℹ️</span></div>
+                    <div class="metric-title">${t.inversion_inicial}</div>
                     <div class="metric-icon">💰</div>
                 </div>
                 <div class="metric-value">${fmt(datos.inversionInicial)} €</div>
@@ -1064,7 +1231,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="cashflow">
                 <div class="metric-header">
-                    <div class="metric-title">${t.flujo_mensual} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Lo que te queda en el bolsillo cada mes tras pagar hipoteca, gastos e impuestos. Indicador clave para renta pasiva.' : 'What you keep each month after mortgage, costs and taxes. Key indicator for passive income.'}">ℹ️</span></div>
+                    <div class="metric-title">${t.flujo_mensual}</div>
                     <div class="metric-icon">${datos.flujoMensual >= 0 ? '📈' : '📉'}</div>
                 </div>
                 <div class="metric-value ${flujoClass}">${fmt(datos.flujoMensual)} €</div>
@@ -1074,7 +1241,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="roi">
                 <div class="metric-header">
-                    <div class="metric-title">${t.roi_anual} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Cashflow anual / Capital invertido. Un ROI alto con cashflow negativo es una señal de alerta.' : 'Annual cashflow / Invested capital. High ROI with negative cashflow is a warning sign.'}">ℹ️</span></div>
+                    <div class="metric-title">${t.roi_anual}</div>
                     <div class="metric-icon">📊</div>
                 </div>
                 <div class="metric-value ${roiClass}">${datos.roiAnual.toFixed(2)}%</div>
@@ -1084,7 +1251,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="tir">
                 <div class="metric-header">
-                    <div class="metric-title">${t.tir_anualizada} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Rentabilidad anual compuesta incluyendo alquileres + ganancia por venta. >7% supera la media histórica del mercado español.' : 'Compound annual return including rent + sale gain. >7% beats Spanish historical average.'}">ℹ️</span></div>
+                    <div class="metric-title">${t.tir_anualizada}</div>
                     <div class="metric-icon">⚡</div>
                 </div>
                 <div class="metric-value ${rentabilidadClass}">${datos.rentabilidadAnual.toFixed(2)}%</div>
@@ -1094,7 +1261,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="beneficio">
                 <div class="metric-header">
-                    <div class="metric-title">${t.beneficio_total} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Flujo acumulado + neto de venta - inversión inicial. El resultado total de tu apuesta.' : 'Accumulated cashflow + net sale - initial investment. The total result of your bet.'}">ℹ️</span></div>
+                    <div class="metric-title">${t.beneficio_total}</div>
                     <div class="metric-icon">${datos.beneficioTotal >= 0 ? '🎯' : '⚠️'}</div>
                 </div>
                 <div class="metric-value ${beneficioClass}">${fmt(datos.beneficioTotal)} €</div>
@@ -1103,7 +1270,7 @@ function mostrarResultados(datos) {
 
             <div class="metric-card" data-tooltip-key="neto">
                 <div class="metric-header">
-                    <div class="metric-title">${t.flujo_acumulado} <span class="metric-info-icon" title="${currentLanguage === 'es' ? 'Suma de todos los cashflows anuales durante el período de análisis, solo por alquileres.' : 'Sum of all annual cashflows during the analysis period, from rentals only.'}">ℹ️</span></div>
+                    <div class="metric-title">${t.flujo_acumulado}</div>
                     <div class="metric-icon">💧</div>
                 </div>
                 <div class="metric-value ${datos.flujoAcumulado >= 0 ? 'metric-positive' : 'metric-negative'}">${fmt(datos.flujoAcumulado)} €</div>
@@ -1111,124 +1278,60 @@ function mostrarResultados(datos) {
             </div>
         </div>
 
-        <!-- DESGLOSE + CASHFLOW LADO A LADO -->
+        <!-- DESGLOSE: gráfico doughnut siempre visible (es pequeño) -->
         ${generarDoughnutHTML(datos)}
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem; margin-bottom:1.25rem;">
-            <div class="detail-card">
+
+        <!-- DESGLOSE INVERSIÓN + CASHFLOW + PROYECCIÓN VENTA — colapsables -->
+        ${colapsable('desglose', '💰 ' + t.desglose_inversion + ' · Cashflow · Proyección venta', `
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">
+            <div class="detail-card" style="margin-bottom:0;">
                 <div class="detail-card-title">${t.desglose_inversion}</div>
-                <div class="detail-row">
-                    <span>${t.entrada_porcentaje} (${datos.entrada}%)</span>
-                    <span>${fmt(datos.montoEntrada)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.impuestos_itp}</span>
-                    <span>${fmt(datos.impuestos)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.gastos_compra_text}</span>
-                    <span>${fmt(datos.gastosCompra)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.gastos_reforma_text}</span>
-                    <span>${fmt(datos.reforma)} €</span>
-                </div>
-                ${datos.financiacionTipo === 'con_hipoteca' ? `
-                <div class="detail-row">
-                    <span>${t.gastos_hipoteca_text}</span>
-                    <span>${fmt(datos.gastosHipoteca)} €</span>
-                </div>` : ''}
-                <div class="detail-row total">
-                    <span>${t.total_inversion}</span>
-                    <span>${fmt(datos.inversionInicial)} €</span>
-                </div>
+                <div class="detail-row"><span>${t.entrada_porcentaje} (${datos.entrada}%)</span><span>${fmt(datos.montoEntrada)} €</span></div>
+                <div class="detail-row"><span>${t.impuestos_itp}</span><span>${fmt(datos.impuestos)} €</span></div>
+                <div class="detail-row"><span>${t.gastos_compra_text}</span><span>${fmt(datos.gastosCompra)} €</span></div>
+                <div class="detail-row"><span>${t.gastos_reforma_text}</span><span>${fmt(datos.reforma)} €</span></div>
+                ${datos.financiacionTipo === 'con_hipoteca' ? `<div class="detail-row"><span>${t.gastos_hipoteca_text}</span><span>${fmt(datos.gastosHipoteca)} €</span></div>` : ''}
+                <div class="detail-row total"><span>${t.total_inversion}</span><span>${fmt(datos.inversionInicial)} €</span></div>
             </div>
-
-            <div class="detail-card">
+            <div class="detail-card" style="margin-bottom:0;">
                 <div class="detail-card-title">${t.cashflow_mensual_card}</div>
-                <div class="detail-row">
-                    <span>${t.ingresos_alquiler}</span>
-                    <span class="metric-positive">+${fmt(datos.ingresosMensuales)} €</span>
-                </div>
-                ${datos.financiacionTipo === 'con_hipoteca' ? `
-                <div class="detail-row">
-                    <span>${t.cuota_hipoteca}</span>
-                    <span class="metric-negative">-${fmt(datos.cuotaHipoteca)} €</span>
-                </div>` : ''}
-                <div class="detail-row">
-                    <span>${t.comunidad_text}</span>
-                    <span class="metric-negative">-${fmt(datos.comunidad)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.ibi_mensual}</span>
-                    <span class="metric-negative">-${fmt(datos.ibi / 12)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.seguro_mensual}</span>
-                    <span class="metric-negative">-${fmt(datos.seguro / 12)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.seguro_impago_mensual}</span>
-                    <span class="metric-negative">-${fmt(datos.seguroImpago / 12)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.mantenimiento_mensual}</span>
-                    <span class="metric-negative">-${fmt(datos.mantenimiento / 12)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.administracion_text}</span>
-                    <span class="metric-negative">-${fmt(datos.administracion)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.impuestos_alquiler}</span>
-                    <span class="metric-negative">-${fmt(datos.taxMensual)} €</span>
-                </div>
-                <div class="detail-row total">
-                    <span>${t.net_cashflow}</span>
-                    <span class="${flujoClass}">${fmt(datos.flujoMensual)} €</span>
-                </div>
+                <div class="detail-row"><span>${t.ingresos_alquiler}</span><span class="metric-positive">+${fmt(datos.ingresosMensuales)} €</span></div>
+                ${datos.financiacionTipo === 'con_hipoteca' ? `<div class="detail-row"><span>${t.cuota_hipoteca}</span><span class="metric-negative">-${fmt(datos.cuotaHipoteca)} €</span></div>` : ''}
+                <div class="detail-row"><span>${t.comunidad_text}</span><span class="metric-negative">-${fmt(datos.comunidad)} €</span></div>
+                <div class="detail-row"><span>${t.ibi_mensual}</span><span class="metric-negative">-${fmt(datos.ibi / 12)} €</span></div>
+                <div class="detail-row"><span>${t.seguro_mensual}</span><span class="metric-negative">-${fmt(datos.seguro / 12)} €</span></div>
+                <div class="detail-row"><span>${t.seguro_impago_mensual}</span><span class="metric-negative">-${fmt(datos.seguroImpago / 12)} €</span></div>
+                <div class="detail-row"><span>${t.mantenimiento_mensual}</span><span class="metric-negative">-${fmt(datos.mantenimiento / 12)} €</span></div>
+                <div class="detail-row"><span>${t.administracion_text}</span><span class="metric-negative">-${fmt(datos.administracion)} €</span></div>
+                <div class="detail-row"><span>${t.impuestos_alquiler}</span><span class="metric-negative">-${fmt(datos.taxMensual)} €</span></div>
+                <div class="detail-row total"><span>${t.net_cashflow}</span><span class="${flujoClass}">${fmt(datos.flujoMensual)} €</span></div>
             </div>
-
-            <div class="detail-card">
+            <div class="detail-card" style="margin-bottom:0;">
                 <div class="detail-card-title">${t.proyeccion_venta} ${datos.anosAnalisis})</div>
-                <div class="detail-row">
-                    <span>${t.valor_estimado}</span>
-                    <span>${fmt(datos.precioVentaBruto)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.gastos_venta_porcentaje}</span>
-                    <span class="metric-negative">-${fmt(datos.gastosVentaEuros)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.plusvalia_municipal}</span>
-                    <span class="metric-negative">-${fmt(datos.plusvalia)} €</span>
-                </div>
-                <div class="detail-row">
-                    <span>${t.irpf_ganancia}</span>
-                    <span class="metric-negative">-${fmt(datos.impuestosGanancias)} €</span>
-                </div>
-                <div class="detail-row total">
-                    <span>${t.valor_neto_venta}</span>
-                    <span class="metric-info">${fmt(datos.precioVentaNeto)} €</span>
-                </div>
+                <div class="detail-row"><span>${t.valor_estimado}</span><span>${fmt(datos.precioVentaBruto)} €</span></div>
+                <div class="detail-row"><span>${t.gastos_venta_porcentaje}</span><span class="metric-negative">-${fmt(datos.gastosVentaEuros)} €</span></div>
+                <div class="detail-row"><span>${t.plusvalia_municipal}</span><span class="metric-negative">-${fmt(datos.plusvalia)} €</span></div>
+                <div class="detail-row"><span>${t.irpf_ganancia}</span><span class="metric-negative">-${fmt(datos.impuestosGanancias)} €</span></div>
+                <div class="detail-row total"><span>${t.valor_neto_venta}</span><span class="metric-info">${fmt(datos.precioVentaNeto)} €</span></div>
             </div>
-        </div>
+        </div>`, false)}
 
-        <!-- CALCULADORA INVERSA (justo tras distribución de costes) -->
+        <!-- CALCULADORA INVERSA — siempre visible, es pequeña -->
         ${generarCalculadoraInversaHTML()}
 
-        <!-- GRÁFICO DE EVOLUCIÓN TEMPORAL -->
-        ${generarLineChartHTML()}
+        <!-- GRÁFICO EVOLUCIÓN TEMPORAL — colapsable cerrado -->
+        ${colapsable('linechart', '📈 Evolución del beneficio acumulado año a año', generarLineChartHTML(), false)}
 
-        <!-- TABLA DE HIPOTECA CON AMORTIZACIONES -->
-        ${datos.financiacionTipo === 'con_hipoteca' ? generarTablaHipotecaHTML(datos) : ''}
+        <!-- TABLA HIPOTECA — colapsable cerrado -->
+        ${datos.financiacionTipo === 'con_hipoteca' ? colapsable('hipoteca', '🏦 Cuadro de amortización hipotecaria', generarTablaHipotecaHTML(datos), false) : ''}
 
-        <!-- TABLA DE PROYECCIONES AÑO A AÑO -->
-        <div class="detail-card">
-            <div class="detail-card-title">${t.proyecciones_ano}</div>
-            ${tablaProyecciones}
-        </div>
+        <!-- PROYECCIONES AÑO A AÑO — colapsable cerrado -->
+        ${colapsable('proyecciones', '📅 ' + t.proyecciones_ano, `<div class="detail-card" style="margin-bottom:0;">${tablaProyecciones}</div>`, false)}
 
-        <!-- COMPARACIÓN CON OTRAS INVERSIONES (al final) -->
+        <!-- SIMULADOR TIPOS — colapsable -->
+        ${generarSimuladorTiposHTML(datos)}
+
+        <!-- COMPARACIÓN — siempre visible -->
         <div class="detail-card" style="margin-bottom:1.25rem;">
             <div class="detail-card-title">${t.comparacion_inversiones}</div>
             <div class="comparison-table">${comparacionHTML}</div>
@@ -1583,6 +1686,58 @@ function exportToPDF() {
 
     // ── PÁGINA 2: PARÁMETROS DE LA INVERSIÓN ─────────────────
     newPage();
+
+    // ── BLOQUE REFERENCIA DE MERCADO (si se rellenó) ──────────
+    const _cpPDF  = (document.getElementById('codigoPostal')?.value || '').trim();
+    const _m2PDF  = parseFloat(document.getElementById('precioRefM2')?.value) || 0;
+    const _supPDF = parseFloat(document.getElementById('superficieM2')?.value) || 0;
+    const _descPDF= parseFloat(document.getElementById('descuentoOferta')?.value) || 10;
+    const _precioPDF = parseFloat(document.getElementById('precio')?.value) || 0;
+
+    if (_cpPDF && _m2PDF > 0) {
+        const _prefPDF = _cpPDF.slice(0, 2);
+        const _provPDF = PROVINCIA_DATA[_prefPDF];
+        const _vmPDF   = _m2PDF * (_supPDF || 0);
+        const _difPDF  = _precioPDF - _vmPDF;
+        const _difPctPDF = _vmPDF > 0 ? (_difPDF / _vmPDF) * 100 : 0;
+        const _ofertaPDF = _precioPDF * (1 - _descPDF / 100);
+
+        checkPageBreak(52);
+        fillRect(ML, y, CW, 8, C.primary);
+        setFont('bold', 9.5, C.white);
+        text(s(esEs ? '📍 Referencia de Mercado y Estrategia de Oferta' : '📍 Market Reference & Offer Strategy'), ML + 3, y + 5.5);
+        y += 12;
+
+        if (_provPDF) {
+            setFont('bold', 8, C.dark);
+            text(s(esEs ? 'Provincia detectada: ' + _provPDF.nombre : 'Province detected: ' + _provPDF.nombre), ML, y);
+            y += 5;
+        }
+
+        twoColMetrics([
+            { label: esEs ? 'Código postal' : 'Postal code',            value: _cpPDF },
+            { label: esEs ? 'Precio de referencia €/m²' : 'Ref. price €/m²', value: f(_m2PDF) + ' €/m²' },
+            ...(_supPDF > 0 ? [
+                { label: esEs ? 'Superficie del inmueble' : 'Property size', value: _supPDF + ' m²' },
+                { label: esEs ? 'Valor estimado de mercado' : 'Estimated market value', value: f(Math.round(_vmPDF)) + ' €', color: C.primary },
+            ] : []),
+            { label: esEs ? 'Precio de compra pactado' : 'Agreed purchase price', value: f(_precioPDF) + ' €' },
+            ...(_supPDF > 0 ? [
+                { label: esEs ? 'Diferencia vs. mercado' : 'Diff. vs. market',
+                  value: (_difPDF >= 0 ? '+' : '') + f(Math.round(_difPDF)) + ' € (' + (_difPDF >= 0 ? '+' : '') + _difPctPDF.toFixed(1) + '%)',
+                  color: _difPDF > 0 ? C.danger : C.accent },
+            ] : []),
+            { label: esEs ? 'Descuento de negociación' : 'Negotiation discount', value: _descPDF + '%' },
+            { label: esEs ? 'Oferta inicial sugerida' : 'Suggested initial offer', value: f(Math.round(_ofertaPDF)) + ' €', color: C.accent },
+            { label: esEs ? 'Ahorro potencial si aceptan' : 'Potential saving if accepted', value: f(Math.round(_precioPDF - _ofertaPDF)) + ' €', color: C.accent },
+        ]);
+
+        setFont('normal', 7, C.grey);
+        text(s(esEs
+            ? '* Precios de referencia basados en datos provinciales estimados (Tinsa/INE 2025). Consultar portales inmobiliarios para mayor precisión.'
+            : '* Reference prices based on estimated provincial data (Tinsa/INE 2025). Check property portals for greater accuracy.'), ML, y);
+        y += 10;
+    }
 
     sectionTitle(esEs ? 'Parámetros de la Inversión' : 'Investment Parameters');
 
@@ -2269,6 +2424,42 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarBannerCookies();
     initDarkMode();
     initTooltips();
+
+    // WhatsApp, Guardar, Comparar, Turístico
+    document.getElementById('whatsappBtn')?.addEventListener('click', compartirWhatsApp);
+    document.getElementById('saveBtn')?.addEventListener('click', openSavedModal);
+    document.getElementById('compareBtn')?.addEventListener('click', openCompareModal);
+    document.getElementById('calcTuristicoBtn')?.addEventListener('click', calcularTuristico);
+
+    // ── Referencia de mercado ──
+    const cpInput = document.getElementById('codigoPostal');
+    const precioRefInput = document.getElementById('precioRefM2');
+    const superficieInput = document.getElementById('superficieM2');
+    const descuentoInput = document.getElementById('descuentoOferta');
+    const precioInputMercado = document.getElementById('precio');
+
+    // Precio de referencia: si el usuario escribe manualmente, desactivar autocompletado
+    if (precioRefInput) {
+        precioRefInput.addEventListener('input', () => {
+            _mercadoPrecioManual = true;
+            actualizarMercado();
+        });
+        // Si borra el campo, volver a modo automático
+        precioRefInput.addEventListener('blur', () => {
+            if (!precioRefInput.value) {
+                _mercadoPrecioManual = false;
+                actualizarMercado();
+            }
+        });
+    }
+    // Código postal: escuchar todas las formas de entrada
+    if (cpInput) {
+        ['input', 'change'].forEach(ev => cpInput.addEventListener(ev, actualizarMercado));
+        cpInput.addEventListener('paste', () => setTimeout(actualizarMercado, 20));
+    }
+    if (superficieInput) superficieInput.addEventListener('input', actualizarMercado);
+    if (descuentoInput) descuentoInput.addEventListener('input', actualizarMercado);
+    if (precioInputMercado) precioInputMercado.addEventListener('input', actualizarMercado);
 });
 // ============================================================
 // COOKIES
@@ -2814,313 +3005,846 @@ function aceptarCookies() {
 }
 
 // ============================================================
-// MEJORA 2: GUARDAR / RECUPERAR ESCENARIOS CON localStorage
+// COOKIES
 // ============================================================
-const PARAM_IDS = [
-    'precio','tipoVivienda','gastosCompra','reforma',
-    'financiacionTipo','entradaEuros','interes','anos','gastosHipoteca',
-    'alquiler','mesesVacio','incrementoAlquiler','anosAnalisis',
-    'ibi','comunidad','seguro','seguroImpago','mantenimiento',
-    'administracion','incrementoGastos','taxAlquiler',
-    'revalorizacion','gastosVenta','plusvalia','irpfVenta','ccaaSelector'
-];
 
-function leerParametrosActuales() {
+// ============================================================
+// WHATSAPP SHARE
+// ============================================================
+function compartirWhatsApp() {
+    const datos = window._lastDatos;
+    if (!datos) { alert('Primero analiza una inversión'); return; }
+
+    const precio = parseFloat(document.getElementById('precio')?.value) || 0;
+    const cf = datos.flujoMensual;
+    const tir = datos.rentabilidadAnual.toFixed(2);
+    const roi = datos.roiAnual.toFixed(2);
+    const inv = datos.inversionInicial;
+
+    const params = new URLSearchParams();
+    const ids = ['precio','entradaEuros','interes','anos','alquiler','mesesVacio','anosAnalisis',
+                 'revalorizacion','ibi','comunidad','seguro','seguroImpago','mantenimiento',
+                 'administracion','incrementoAlquiler','incrementoGastos','taxAlquiler',
+                 'gastosVenta','irpfVenta','plusvaliaPorc','reforma','gastosCompra',
+                 'gastosHipoteca','tipoVivienda','financiacionTipo','ccaa'];
+    ids.forEach(id => { const el = document.getElementById(id); if (el) params.set(id, el.value); });
+    params.set('lang', currentLanguage);
+    const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+
+    const msg = `🏠 *Análisis de inversión inmobiliaria*\n\n` +
+        `💰 Inversión inicial: *${fmt(inv)} €*\n` +
+        `📈 Cashflow mensual: *${fmt(cf)} €/mes*\n` +
+        `⚡ TIR: *${tir}%*  |  ROI: *${roi}%*\n\n` +
+        `Ver análisis completo 👇\n${url}`;
+
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
+}
+
+// ============================================================
+// ANÁLISIS GUARDADOS (localStorage)
+// ============================================================
+const SAVED_KEY = 'pisorentable_saved_v1';
+
+function getSaved() {
+    try { return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); }
+    catch(e) { return []; }
+}
+
+function setSaved(list) {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(list));
+}
+
+function openSavedModal() {
+    renderSavedList();
+    document.getElementById('savedModal').classList.add('active');
+    // Sugerir nombre basado en CP o precio
+    const cp = document.getElementById('codigoPostal')?.value || '';
+    const precio = document.getElementById('precio')?.value || '';
+    const hint = cp ? `Piso ${cp}` : precio ? `Inmueble ${fmt(parseFloat(precio))}€` : '';
+    document.getElementById('saveNameInput').value = hint;
+}
+
+function closeSavedModal() {
+    document.getElementById('savedModal').classList.remove('active');
+}
+
+function saveCurrentAnalysis() {
+    const name = document.getElementById('saveNameInput').value.trim();
+    if (!name) { document.getElementById('saveNameInput').focus(); return; }
+
+    const ids = ['precio','entradaEuros','interes','anos','alquiler','mesesVacio','anosAnalisis',
+                 'revalorizacion','ibi','comunidad','seguro','seguroImpago','mantenimiento',
+                 'administracion','incrementoAlquiler','incrementoGastos','taxAlquiler',
+                 'gastosVenta','irpfVenta','plusvaliaPorc','reforma','gastosCompra',
+                 'gastosHipoteca','tipoVivienda','financiacionTipo','ccaa','codigoPostal'];
     const params = {};
-    PARAM_IDS.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) params[id] = el.value;
-    });
-    return params;
-}
+    ids.forEach(id => { const el = document.getElementById(id); if (el) params[id] = el.value; });
 
-function guardarEscenario() {
-    const nombre = prompt(currentLanguage === 'es'
-        ? 'Nombre para este escenario (ej: Piso Málaga):'
-        : 'Name for this scenario (e.g. Flat London):');
-    if (!nombre || !nombre.trim()) return;
-
-    const key = 'pisorentable_escenarios';
-    const existentes = JSON.parse(localStorage.getItem(key) || '[]');
-    const nuevo = {
+    const datos = window._lastDatos;
+    const saved = getSaved();
+    saved.unshift({
         id: Date.now(),
-        nombre: nombre.trim(),
-        fecha: new Date().toLocaleDateString(currentLanguage === 'es' ? 'es-ES' : 'en-GB'),
-        params: leerParametrosActuales(),
-        resumen: window._lastDatos ? {
-            flujoMensual: window._lastDatos.flujoMensual,
-            rentabilidadAnual: window._lastDatos.rentabilidadAnual,
-            inversionInicial: window._lastDatos.inversionInicial
+        name,
+        date: new Date().toLocaleDateString('es-ES'),
+        params,
+        summary: datos ? {
+            inversion: datos.inversionInicial,
+            cashflow: datos.flujoMensual,
+            tir: datos.rentabilidadAnual,
+            roi: datos.roiAnual,
+            beneficio: datos.beneficioTotal
         } : null
-    };
-    existentes.push(nuevo);
-    localStorage.setItem(key, JSON.stringify(existentes));
-    renderizarEscenariosGuardados();
-    mostrarToastPersonalizado(currentLanguage === 'es' ? `✅ Escenario "${nuevo.nombre}" guardado` : `✅ Scenario "${nuevo.nombre}" saved`);
-}
-
-function cargarEscenario(id) {
-    const key = 'pisorentable_escenarios';
-    const existentes = JSON.parse(localStorage.getItem(key) || '[]');
-    const esc = existentes.find(e => e.id === id);
-    if (!esc) return;
-
-    PARAM_IDS.forEach(pid => {
-        const el = document.getElementById(pid);
-        if (el && esc.params[pid] !== undefined) el.value = esc.params[pid];
     });
-    actualizarEntradaSlider();
-    toggleFinanciacionInputs();
-    window.actualizarITPHint && window.actualizarITPHint();
+    // Máximo 20 análisis guardados
+    if (saved.length > 20) saved.splice(20);
+    setSaved(saved);
+    renderSavedList();
+    document.getElementById('saveNameInput').value = '';
+
+    // Toast de confirmación
+    const toast = document.getElementById('shareToast');
+    if (toast) {
+        toast.textContent = '💾 Análisis guardado correctamente';
+        toast.classList.add('visible');
+        setTimeout(() => { toast.classList.remove('visible'); toast.textContent = '✅ Enlace copiado al portapapeles'; }, 2500);
+    }
+}
+
+function renderSavedList() {
+    const list = document.getElementById('savedList');
+    if (!list) return;
+    const saved = getSaved();
+    if (saved.length === 0) {
+        list.innerHTML = '<p class="saved-empty">No tienes análisis guardados todavía.<br>Rellena los datos, analiza y pulsa Guardar.</p>';
+        return;
+    }
+    list.innerHTML = saved.map(a => `
+        <div class="saved-item">
+            <div class="saved-item-info">
+                <span class="saved-item-name">${a.name}</span>
+                <span class="saved-item-date">${a.date}</span>
+                ${a.summary ? `
+                <div class="saved-item-kpis">
+                    <span class="saved-kpi">💰 ${fmt(a.summary.inversion)}€</span>
+                    <span class="saved-kpi ${a.summary.cashflow >= 0 ? 'kpi-pos' : 'kpi-neg'}">${fmt(a.summary.cashflow)}€/mes</span>
+                    <span class="saved-kpi">TIR ${a.summary.tir.toFixed(1)}%</span>
+                </div>` : ''}
+            </div>
+            <div class="saved-item-actions">
+                <button class="btn-saved-load" onclick="loadSaved(${a.id})" title="Cargar">📂</button>
+                <button class="btn-saved-del" onclick="deleteSaved(${a.id})" title="Eliminar">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function loadSaved(id) {
+    const saved = getSaved();
+    const item = saved.find(a => a.id === id);
+    if (!item) return;
+    Object.entries(item.params).forEach(([k, v]) => {
+        const el = document.getElementById(k);
+        if (el) { el.value = v; el.dispatchEvent(new Event('change')); }
+    });
     calcular();
-    mostrarToastPersonalizado(currentLanguage === 'es' ? `📂 Escenario "${esc.nombre}" cargado` : `📂 Scenario "${esc.nombre}" loaded`);
+    closeSavedModal();
 }
 
-function eliminarEscenario(id) {
-    const key = 'pisorentable_escenarios';
-    let existentes = JSON.parse(localStorage.getItem(key) || '[]');
-    existentes = existentes.filter(e => e.id !== id);
-    localStorage.setItem(key, JSON.stringify(existentes));
-    renderizarEscenariosGuardados();
-}
-
-function renderizarEscenariosGuardados() {
-    const container = document.getElementById('escenariosGuardadosLista');
-    if (!container) return;
-    const key = 'pisorentable_escenarios';
-    const lista = JSON.parse(localStorage.getItem(key) || '[]');
-    const esEs = currentLanguage === 'es';
-
-    if (lista.length === 0) {
-        container.innerHTML = `<p class="escenarios-empty">${esEs ? 'No hay escenarios guardados aún.' : 'No saved scenarios yet.'}</p>`;
-        return;
+function deleteSaved(id) {
+    const saved = getSaved().filter(a => a.id !== id);
+    setSaved(saved);
+    renderSavedList();
+    // Actualizar selectores del comparador si está abierto
+    if (document.getElementById('compareModal').classList.contains('active')) {
+        renderCompareSelectors();
     }
-
-    container.innerHTML = lista.map(esc => {
-        const flujo = esc.resumen ? fmt(esc.resumen.flujoMensual) + ' €/mes' : '—';
-        const tir = esc.resumen ? esc.resumen.rentabilidadAnual.toFixed(2) + '%' : '—';
-        const flujoClass = esc.resumen && esc.resumen.flujoMensual >= 0 ? 'metric-positive' : 'metric-negative';
-        return `
-        <div class="escenario-item">
-            <div class="escenario-info">
-                <div class="escenario-nombre">📁 ${esc.nombre}</div>
-                <div class="escenario-meta">${esc.fecha} · CF: <span class="${flujoClass}">${flujo}</span> · TIR: ${tir}</div>
-            </div>
-            <div class="escenario-acciones">
-                <button class="btn-escenario-cargar" onclick="cargarEscenario(${esc.id})" title="${esEs ? 'Cargar' : 'Load'}">📂</button>
-                <button class="btn-escenario-borrar" onclick="eliminarEscenario(${esc.id})" title="${esEs ? 'Eliminar' : 'Delete'}">🗑️</button>
-            </div>
-        </div>`;
-    }).join('');
-}
-
-function mostrarToastPersonalizado(msg) {
-    let toast = document.getElementById('customToast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'customToast';
-        toast.className = 'share-toast';
-        toast.style.cssText = 'position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);transition:opacity 0.4s;z-index:9999;';
-        document.body.appendChild(toast);
-    }
-    toast.textContent = msg;
-    toast.style.display = 'block';
-    toast.style.opacity = '1';
-    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => { toast.style.display = 'none'; }, 400); }, 2500);
-}
-
-function toggleEscenariosPanel() {
-    const panel = document.getElementById('escenariosPanel');
-    if (!panel) return;
-    const abierto = panel.classList.toggle('abierto');
-    if (abierto) renderizarEscenariosGuardados();
 }
 
 // ============================================================
-// MEJORA 1: COMPARADOR DE DOS PROPIEDADES
+// COMPARADOR DE INMUEBLES
 // ============================================================
-let comparadorVisible = false;
-let comparadorDatos = { a: null, b: null };
-
-function toggleComparador() {
-    const modal = document.getElementById('comparadorModal');
-    if (!modal) return;
-    comparadorVisible = !comparadorVisible;
-    modal.style.display = comparadorVisible ? 'flex' : 'none';
-    if (comparadorVisible) actualizarComparador();
-}
-
-function capturarParaComparador(slot) {
-    if (!window._lastDatos) {
-        mostrarToastPersonalizado(currentLanguage === 'es' ? '⚠️ Primero calcula la inversión' : '⚠️ Calculate first');
+function openCompareModal() {
+    const saved = getSaved();
+    if (saved.length < 2) {
+        alert('Necesitas al menos 2 análisis guardados para comparar.\n\nGuarda el análisis actual con el botón 💾 Guardar.');
         return;
     }
-    const nombre = prompt(currentLanguage === 'es'
-        ? `Nombre para esta propiedad (slot ${slot.toUpperCase()}):` 
-        : `Name for this property (slot ${slot.toUpperCase()}):`);
-    if (nombre === null) return;
-    comparadorDatos[slot] = {
-        nombre: nombre.trim() || (currentLanguage === 'es' ? `Propiedad ${slot.toUpperCase()}` : `Property ${slot.toUpperCase()}`),
-        datos: { ...window._lastDatos }
-    };
-    actualizarComparador();
+    renderCompareSelectors();
+    document.getElementById('compareModal').classList.add('active');
 }
 
-function actualizarComparador() {
-    const body = document.getElementById('comparadorBody');
-    if (!body) return;
-    const esEs = currentLanguage === 'es';
-    const { a, b } = comparadorDatos;
+function closeCompareModal() {
+    document.getElementById('compareModal').classList.remove('active');
+}
 
-    if (!a && !b) {
-        body.innerHTML = `<p style="text-align:center;color:var(--text-light);padding:2rem;">${esEs ? 'Captura dos propiedades para compararlas.' : 'Capture two properties to compare them.'}</p>`;
+function renderCompareSelectors() {
+    const saved = getSaved();
+    const opts = saved.map(a => `<option value="${a.id}">${a.name} (${a.date})</option>`).join('');
+    document.getElementById('compareSelectA').innerHTML = opts;
+    document.getElementById('compareSelectB').innerHTML = opts;
+    // Seleccionar el segundo por defecto en B
+    if (saved.length >= 2) document.getElementById('compareSelectB').selectedIndex = 1;
+    document.getElementById('compareResult').innerHTML = '';
+}
+
+function runComparison() {
+    const saved = getSaved();
+    const idA = parseInt(document.getElementById('compareSelectA').value);
+    const idB = parseInt(document.getElementById('compareSelectB').value);
+    if (idA === idB) { alert('Selecciona dos análisis diferentes'); return; }
+
+    const a = saved.find(x => x.id === idA);
+    const b = saved.find(x => x.id === idB);
+    if (!a || !b || !a.summary || !b.summary) {
+        document.getElementById('compareResult').innerHTML = '<p style="color:var(--danger)">Uno de los análisis no tiene datos. Cárgalo, analiza y guárdalo de nuevo.</p>';
         return;
     }
 
     const metrics = [
-        { key: 'inversionInicial', label: esEs ? 'Inversión inicial' : 'Initial investment', fmt: v => fmt(v) + ' €', lowerBetter: true },
-        { key: 'flujoMensual', label: esEs ? 'Cashflow mensual' : 'Monthly cashflow', fmt: v => fmt(v) + ' €/mes', lowerBetter: false },
-        { key: 'roiAnual', label: 'ROI anual', fmt: v => v.toFixed(2) + '%', lowerBetter: false },
-        { key: 'rentabilidadAnual', label: 'TIR estimada', fmt: v => v.toFixed(2) + '%', lowerBetter: false },
-        { key: 'beneficioTotal', label: esEs ? 'Beneficio total' : 'Total profit', fmt: v => fmt(v) + ' €', lowerBetter: false },
-        { key: 'precioVentaNeto', label: esEs ? 'Neto al vender' : 'Net on sale', fmt: v => fmt(v) + ' €', lowerBetter: false },
-        { key: 'flujoAcumulado', label: esEs ? 'Flujo acumulado' : 'Accumulated cashflow', fmt: v => fmt(v) + ' €', lowerBetter: false },
+        { label: 'Inversión inicial', ka: a.summary.inversion, kb: b.summary.inversion, fmt: v => fmt(v) + ' €', lowerIsBetter: true },
+        { label: 'Cashflow mensual', ka: a.summary.cashflow, kb: b.summary.cashflow, fmt: v => fmt(v) + ' €/mes', lowerIsBetter: false },
+        { label: 'TIR anualizada', ka: a.summary.tir, kb: b.summary.tir, fmt: v => v.toFixed(2) + '%', lowerIsBetter: false },
+        { label: 'ROI anual', ka: a.summary.roi, kb: b.summary.roi, fmt: v => v.toFixed(2) + '%', lowerIsBetter: false },
+        { label: 'Beneficio total', ka: a.summary.beneficio, kb: b.summary.beneficio, fmt: v => fmt(v) + ' €', lowerIsBetter: false },
     ];
 
-    const renderSlot = (slot, data) => {
-        if (!data) return `
-            <div class="comp-slot comp-slot--empty">
-                <div class="comp-slot-title">${esEs ? 'Propiedad' : 'Property'} ${slot.toUpperCase()}</div>
-                <button class="btn btn-primary" style="margin-top:1rem;" onclick="capturarParaComparador('${slot}')">
-                    ${esEs ? '📷 Capturar análisis actual' : '📷 Capture current analysis'}
-                </button>
-            </div>`;
-        return `
-            <div class="comp-slot">
-                <div class="comp-slot-title">${data.nombre}</div>
-                <button class="btn btn-share btn-sm" onclick="capturarParaComparador('${slot}')" style="margin-bottom:0.75rem;font-size:0.75rem;">🔄 ${esEs ? 'Reemplazar' : 'Replace'}</button>
-            </div>`;
-    };
-
-    const aVal = (key) => a ? a.datos[key] : null;
-    const bVal = (key) => b ? b.datos[key] : null;
-
-    const winnerClass = (va, vb, lowerBetter) => {
-        if (va === null || vb === null) return ['', ''];
-        const aWins = lowerBetter ? va < vb : va > vb;
-        const tie = Math.abs(va - vb) < 0.01;
-        if (tie) return ['comp-tie', 'comp-tie'];
-        return aWins ? ['comp-winner', 'comp-loser'] : ['comp-loser', 'comp-winner'];
-    };
-
+    let scoreA = 0, scoreB = 0;
     const rows = metrics.map(m => {
-        const va = aVal(m.key);
-        const vb = bVal(m.key);
-        const [ca, cb] = winnerClass(va, vb, m.lowerBetter);
+        const aBetter = m.lowerIsBetter ? m.ka < m.kb : m.ka > m.kb;
+        const bBetter = m.lowerIsBetter ? m.kb < m.ka : m.kb > m.ka;
+        if (aBetter) scoreA++;
+        if (bBetter) scoreB++;
         return `
         <tr>
-            <td class="comp-metric-label">${m.label}</td>
-            <td class="comp-value ${ca}">${va !== null ? m.fmt(va) : '—'}</td>
-            <td class="comp-value ${cb}">${vb !== null ? m.fmt(vb) : '—'}</td>
+            <td class="cmp-label">${m.label}</td>
+            <td class="cmp-val ${aBetter ? 'cmp-winner' : bBetter ? 'cmp-loser' : ''}">${m.fmt(m.ka)}</td>
+            <td class="cmp-val ${bBetter ? 'cmp-winner' : aBetter ? 'cmp-loser' : ''}">${m.fmt(m.kb)}</td>
         </tr>`;
     }).join('');
 
-    body.innerHTML = `
-    <div class="comp-header-row">
-        ${renderSlot('a', a)}
-        <div class="comp-vs">VS</div>
-        ${renderSlot('b', b)}
-    </div>
-    <table class="comp-table">
-        <thead>
-            <tr>
-                <th>${esEs ? 'Métrica' : 'Metric'}</th>
-                <th>${a ? a.nombre : 'A'}</th>
-                <th>${b ? b.nombre : 'B'}</th>
-            </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-    </table>
-    <p class="comp-nota">🏆 ${esEs ? 'Verde = mejor resultado · Rojo = peor resultado' : 'Green = better result · Red = worse result'}</p>`;
+    const winner = scoreA > scoreB ? a.name : scoreB > scoreA ? b.name : null;
+    const verdict = winner
+        ? `🏆 <strong>${winner}</strong> gana en ${Math.max(scoreA, scoreB)} de ${metrics.length} métricas`
+        : `🤝 Empate — depende de tus prioridades`;
+
+    document.getElementById('compareResult').innerHTML = `
+        <div class="cmp-verdict">${verdict}</div>
+        <div class="cmp-table-wrap">
+            <table class="cmp-table">
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th class="${scoreA > scoreB ? 'cmp-winner-header' : ''}">${a.name}</th>
+                        <th class="${scoreB > scoreA ? 'cmp-winner-header' : ''}">${b.name}</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+        <p class="cmp-note">* Verde = mejor valor en esa métrica. Carga cualquier análisis con 📂 para simularlo en detalle.</p>
+    `;
 }
 
 // ============================================================
-// MEJORA 3: SEMÁFORO VISUAL
+// SIMULADOR TURÍSTICO
 // ============================================================
-function calcularSemaforo(datos) {
-    const puntos = [];
-    let total = 0;
+function calcularTuristico() {
+    const precioNoche = parseFloat(document.getElementById('precioNoche')?.value) || 0;
+    const ocupacion   = parseFloat(document.getElementById('ocupacionTuristico')?.value) || 65;
+    const comision    = parseFloat(document.getElementById('comisionPlataforma')?.value) || 15;
+    const limpieza    = parseFloat(document.getElementById('gastosLimpieza')?.value) || 0;
+    const suministros = parseFloat(document.getElementById('suministrosTuristico')?.value) || 0;
 
-    if (datos.flujoMensual > 200) { puntos.push({ ok: 'green', label: `Cashflow > 200 €/mes ✅` }); total += 3; }
-    else if (datos.flujoMensual >= 0) { puntos.push({ ok: 'yellow', label: `Cashflow positivo pero bajo ⚠️` }); total += 1.5; }
-    else { puntos.push({ ok: 'red', label: `Cashflow negativo (${fmt(datos.flujoMensual)} €/mes) ❌` }); }
+    if (precioNoche <= 0) { alert('Introduce el precio por noche'); return; }
 
-    if (datos.rentabilidadAnual > 7) { puntos.push({ ok: 'green', label: `TIR excelente (${datos.rentabilidadAnual.toFixed(1)}%) ✅` }); total += 3; }
-    else if (datos.rentabilidadAnual >= 4) { puntos.push({ ok: 'yellow', label: `TIR moderada (${datos.rentabilidadAnual.toFixed(1)}%) ⚠️` }); total += 1.5; }
-    else { puntos.push({ ok: 'red', label: `TIR baja (${datos.rentabilidadAnual.toFixed(1)}%) ❌` }); }
+    // Ingresos turístico
+    const nochesOcupadas = 365 * (ocupacion / 100);
+    const ingresosBrutos = precioNoche * nochesOcupadas;
+    const gastosPlataforma = ingresosBrutos * (comision / 100);
+    const ingresosNetos = ingresosBrutos - gastosPlataforma - limpieza - suministros;
+    const ingresosMensuales = ingresosNetos / 12;
 
-    if (datos.roiAnual > 5) { puntos.push({ ok: 'green', label: `ROI sólido (${datos.roiAnual.toFixed(1)}%) ✅` }); total += 2; }
-    else if (datos.roiAnual >= 3) { puntos.push({ ok: 'yellow', label: `ROI moderado (${datos.roiAnual.toFixed(1)}%) ⚠️` }); total += 1; }
-    else { puntos.push({ ok: 'red', label: `ROI bajo (${datos.roiAnual.toFixed(1)}%) ❌` }); }
+    // Ingresos larga duración (del tab ingresos)
+    const alquilerLD = parseFloat(document.getElementById('alquiler')?.value) || 0;
+    const mesesVacioLD = parseFloat(document.getElementById('mesesVacio')?.value) || 0;
+    const ingresosLD = alquilerLD * 12 * (1 - mesesVacioLD / 12);
+    const ingresosLDMensual = ingresosLD / 12;
 
-    if (datos.beneficioTotal > 0) { puntos.push({ ok: 'green', label: `Beneficio total positivo ✅` }); total += 2; }
-    else { puntos.push({ ok: 'red', label: `Beneficio total negativo ❌` }); }
+    const difAnual = ingresosNetos - ingresosLD;
+    const difClass = difAnual >= 0 ? 'metric-positive' : 'metric-negative';
+    const signo = difAnual >= 0 ? '+' : '';
 
-    const max = 10;
-    const pct = Math.min(100, (total / max) * 100);
-    let nivel, color, emoji;
-    if (pct >= 70) { nivel = currentLanguage === 'es' ? 'Inversión atractiva' : 'Attractive investment'; color = '#10b981'; emoji = '🟢'; }
-    else if (pct >= 40) { nivel = currentLanguage === 'es' ? 'Inversión moderada' : 'Moderate investment'; color = '#f59e0b'; emoji = '🟡'; }
-    else { nivel = currentLanguage === 'es' ? 'Inversión con riesgos' : 'Risky investment'; color = '#ef4444'; emoji = '🔴'; }
-
-    return { puntos, pct, nivel, color, emoji };
-}
-
-function generarSemaforoHTML(datos) {
-    const s = calcularSemaforo(datos);
-    const esEs = currentLanguage === 'es';
-    const dotColor = (ok) => ok === 'green' ? '#10b981' : ok === 'yellow' ? '#f59e0b' : '#ef4444';
-    return `
-    <div class="semaforo-card">
-        <div class="semaforo-header">
-            <span class="semaforo-emoji">${s.emoji}</span>
-            <div>
-                <div class="semaforo-nivel" style="color:${s.color}">${s.nivel}</div>
-                <div class="semaforo-sub">${esEs ? 'Evaluación rápida de la inversión' : 'Quick investment assessment'}</div>
+    const res = document.getElementById('turisticoResultado');
+    res.style.display = 'block';
+    res.innerHTML = `
+        <div class="turistico-comparativa">
+            <div class="turistico-col turistico-col--tur">
+                <div class="tur-col-label">🏖️ Turístico</div>
+                <div class="tur-ing-bruto">${fmt(Math.round(ingresosBrutos))} €/año brutos</div>
+                <div class="tur-detail">− ${comision}% plataforma: ${fmt(Math.round(gastosPlataforma))} €</div>
+                <div class="tur-detail">− Limpieza: ${fmt(limpieza)} €</div>
+                <div class="tur-detail">− Suministros: ${fmt(suministros)} €</div>
+                <div class="tur-neto"><strong>${fmt(Math.round(ingresosNetos))} €/año</strong><br><small>${fmt(Math.round(ingresosMensuales))} €/mes</small></div>
+                <div class="tur-noches">${Math.round(nochesOcupadas)} noches ocupadas/año</div>
             </div>
-            <div class="semaforo-score" style="color:${s.color}">${Math.round(s.pct)}<span>/100</span></div>
+            <div class="turistico-col turistico-col--ld">
+                <div class="tur-col-label">🏠 Larga duración</div>
+                <div class="tur-ing-bruto">${fmt(Math.round(alquilerLD * 12))} €/año brutos</div>
+                <div class="tur-detail">− ${mesesVacioLD} mes(es) vacío</div>
+                <div class="tur-detail">&nbsp;</div>
+                <div class="tur-detail">&nbsp;</div>
+                <div class="tur-neto"><strong>${fmt(Math.round(ingresosLD))} €/año</strong><br><small>${fmt(Math.round(ingresosLDMensual))} €/mes</small></div>
+                <div class="tur-noches">Estabilidad y menos gestión</div>
+            </div>
         </div>
-        <div class="semaforo-bar-bg">
-            <div class="semaforo-bar-fill" style="width:${s.pct}%;background:${s.color}"></div>
+        <div class="turistico-diferencia ${difClass}">
+            ${signo}${fmt(Math.round(difAnual))} €/año con turístico vs. larga duración
         </div>
-        <ul class="semaforo-lista">
-            ${s.puntos.map(p => `<li><span class="semaforo-dot" style="background:${dotColor(p.ok)}"></span>${p.label}</li>`).join('')}
-        </ul>
-        <div class="semaforo-nota">${esEs ? '* Evaluación orientativa basada en umbrales del mercado español.' : '* Indicative assessment based on Spanish market benchmarks.'}</div>
-    </div>`;
+        <p class="turistico-nota">💡 Pulsa "Analizar Inversión" con estos ingresos de turístico cargados automáticamente.</p>
+        <button class="btn btn-primary" style="width:100%; margin-top:0.5rem;" onclick="usarIngresosturistico(${Math.round(ingresosMensuales)})">
+            ✅ Usar ingresos turísticos en el análisis principal
+        </button>
+    `;
 }
 
-window.actualizarITPHint = function() {
-    const tipoViviendaSel = document.getElementById('tipoVivienda');
-    const itpHint = document.getElementById('itpHint');
-    const ccaaGroup = document.getElementById('ccaaGroup');
-    const ccaaSelector = document.getElementById('ccaaSelector');
-    if (!itpHint) return;
-    const t = translations[currentLanguage];
-    const tipoVivienda = tipoViviendaSel ? tipoViviendaSel.value : 'segunda';
-    if (tipoVivienda === 'nueva') {
-        itpHint.textContent = t.itp_hint_nueva;
-        if (ccaaGroup) ccaaGroup.style.display = 'none';
-    } else {
-        if (ccaaGroup) ccaaGroup.style.display = 'block';
-        if (ccaaSelector && ccaaSelector.value) {
-            itpHint.textContent = t.itp_hint_ccaa;
-        } else {
-            itpHint.textContent = t.itp_hint_default;
+window.usarIngresosturistico = function(mensual) {
+    const el = document.getElementById('alquiler');
+    if (el) {
+        el.value = mensual;
+        // Cambiar meses vacío a 0 (turístico ya tiene ocupación integrada)
+        const mv = document.getElementById('mesesVacio');
+        if (mv) mv.value = 0;
+        calcular();
+        // Volver al tab de ingresos para que vea el cambio
+        switchTab('ingresos');
+        const toast = document.getElementById('shareToast');
+        if (toast) {
+            toast.textContent = '🏖️ Ingresos turísticos aplicados';
+            toast.classList.add('visible');
+            setTimeout(() => { toast.classList.remove('visible'); toast.textContent = '✅ Enlace copiado al portapapeles'; }, 2500);
         }
     }
 };
 
 // ============================================================
-// FIN MEJORAS
+// SIMULADOR DE SUBIDA DE TIPOS (se inyecta en resultados)
 // ============================================================
+function generarSimuladorTiposHTML(datos) {
+    if (datos.financiacionTipo !== 'con_hipoteca') return '';
+    return `
+    <div class="col-section" id="col-tipos">
+        <button class="col-header" onclick="toggleCol('tipos')" type="button" aria-expanded="false">
+            <span class="col-title">📉 Simulador de subida de tipos de interés</span>
+            <span class="col-chevron">▾</span>
+        </button>
+        <div class="col-body">
+            <div class="col-inner">
+                <div class="tipos-wrap">
+                    <div class="tipos-controls">
+                        <label class="form-label">Tipo de interés hipotecario</label>
+                        <div class="tipos-slider-row">
+                            <span class="tipos-min">0%</span>
+                            <input type="range" id="tiposSlider" class="form-range" min="0" max="12" step="0.25" value="${datos.interes}"/>
+                            <span class="tipos-max">12%</span>
+                        </div>
+                        <div class="tipos-valor-wrap">
+                            <span id="tiposValorLabel" class="tipos-valor">${datos.interes}%</span>
+                            <span class="tipos-base">(actual: ${datos.interes}%)</span>
+                        </div>
+                    </div>
+                    <div id="tiposResultado" class="tipos-resultado"></div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function initSimuladorTipos(datos) {
+    const slider = document.getElementById('tiposSlider');
+    if (!slider) return;
+
+    function recalcularTipos() {
+        const nuevoTipo = parseFloat(slider.value);
+        document.getElementById('tiposValorLabel').textContent = nuevoTipo.toFixed(2) + '%';
+
+        const capital = datos.prestamo;
+        const anos = datos.anos;
+        const i = nuevoTipo / 100 / 12;
+        const n = anos * 12;
+        const nuevaCuota = i > 0
+            ? capital * i * Math.pow(1+i, n) / (Math.pow(1+i, n) - 1)
+            : capital / n;
+
+        const difCuota = nuevaCuota - datos.cuotaHipoteca;
+        const nuevoCashflow = datos.flujoMensual - difCuota;
+        const difCashflow = nuevoCashflow - datos.flujoMensual;
+        const cfClass = nuevoCashflow >= 0 ? 'metric-positive' : 'metric-negative';
+        const difClass = difCashflow >= 0 ? 'metric-positive' : 'metric-negative';
+
+        // Color del slider según impacto
+        const impacto = Math.abs(difCuota / Math.max(1, datos.cuotaHipoteca));
+        const sliderColor = impacto < 0.1 ? '#10b981' : impacto < 0.25 ? '#f59e0b' : '#ef4444';
+        slider.style.setProperty('--slider-fill', sliderColor);
+
+        document.getElementById('tiposResultado').innerHTML = `
+            <div class="tipos-grid">
+                <div class="tipos-card">
+                    <div class="tipos-card-label">Nueva cuota</div>
+                    <div class="tipos-card-val">${fmt(Math.round(nuevaCuota))} €/mes</div>
+                    <div class="tipos-card-dif ${difCuota > 0 ? 'metric-negative' : 'metric-positive'}">
+                        ${difCuota > 0 ? '+' : ''}${fmt(Math.round(difCuota))} €/mes vs. actual
+                    </div>
+                </div>
+                <div class="tipos-card">
+                    <div class="tipos-card-label">Nuevo cashflow</div>
+                    <div class="tipos-card-val ${cfClass}">${fmt(Math.round(nuevoCashflow))} €/mes</div>
+                    <div class="tipos-card-dif ${difClass}">
+                        ${difCashflow >= 0 ? '+' : ''}${fmt(Math.round(difCashflow))} €/mes
+                    </div>
+                </div>
+                <div class="tipos-card">
+                    <div class="tipos-card-label">Coste extra anual</div>
+                    <div class="tipos-card-val ${difCuota > 0 ? 'metric-negative' : 'metric-positive'}">${fmt(Math.round(Math.abs(difCuota) * 12))} €/año</div>
+                    <div class="tipos-card-dif" style="font-size:0.75rem; color:var(--text-light)">
+                        ${nuevoTipo > datos.interes ? 'impacto de la subida' : nuevoTipo < datos.interes ? 'ahorro de la bajada' : 'sin cambio'}
+                    </div>
+                </div>
+            </div>
+            ${nuevoCashflow < 0 && datos.flujoMensual >= 0
+                ? '<div class="alert alert-danger" style="margin-top:0.75rem;">⚠️ Con este tipo de interés el cashflow se vuelve negativo</div>'
+                : ''}
+        `;
+    }
+
+    slider.addEventListener('input', recalcularTipos);
+    recalcularTipos(); // render inicial
+}
+
+// Registrar en toggleCol para inicializar al abrir
+const _originalToggleCol = window.toggleCol;
+window.toggleCol = function(id) {
+    _originalToggleCol(id);
+    if (id === 'tipos' && window._lastDatos) {
+        setTimeout(() => initSimuladorTipos(window._lastDatos), 50);
+    }
+};
+
+// ============================================================
+// WIDGET EMBEBIBLE
+// ============================================================
+let _widgetSize = 'full';
+const WIDGET_SIZES = {
+    full:    { w: '100%',  h: '900px' },
+    compact: { w: '800px', h: '800px' },
+    mini:    { w: '480px', h: '700px' },
+};
+
+function openWidgetModal() {
+    document.getElementById('widgetModal').classList.add('active');
+    renderWidgetCode();
+}
+
+function closeWidgetModal() {
+    document.getElementById('widgetModal').classList.remove('active');
+}
+
+window.setWidgetSize = function(size) {
+    _widgetSize = size;
+    document.querySelectorAll('.widget-size-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('ws-' + size)?.classList.add('active');
+    renderWidgetCode();
+};
+
+function renderWidgetCode() {
+    const base = 'https://pisorentable.org';
+    const { w, h } = WIDGET_SIZES[_widgetSize] || WIDGET_SIZES.full;
+    const code = `<!-- Calculadora de Inversión Inmobiliaria — pisorentable.org -->
+<iframe
+  src="${base}"
+  width="${w}"
+  height="${h}"
+  style="border:none; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.12);"
+  title="Calculadora rentabilidad alquiler España"
+  loading="lazy"
+  allow="clipboard-write">
+</iframe>
+<p style="font-size:12px; color:#888; margin-top:4px;">
+  Herramienta gratuita por <a href="${base}" target="_blank">pisorentable.org</a>
+</p>`;
+    const pre = document.getElementById('widgetCode');
+    if (pre) pre.textContent = code;
+}
+
+window.copyWidgetCode = function() {
+    const code = document.getElementById('widgetCode')?.textContent || '';
+    navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector('.widget-copy-btn');
+        if (btn) { btn.textContent = '✅ Copiado'; setTimeout(() => btn.textContent = '📋 Copiar', 2000); }
+    });
+};
+
+// Registrar listener del botón widget
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('widgetBtn')?.addEventListener('click', openWidgetModal);
+}, { once: true });
+
+// ============================================================
+// HERRAMIENTAS ADICIONALES — Modal principal
+// ============================================================
+function openToolsModal() {
+    renderHistorial();
+    initModoRapido();
+    document.getElementById('toolsModal').classList.add('active');
+}
+function closeToolsModal() {
+    document.getElementById('toolsModal').classList.remove('active');
+}
+
+window.toggleTool = function(id) {
+    const sec = document.getElementById('tool-' + id);
+    if (!sec) return;
+    const isOpen = sec.classList.contains('tool-open');
+    // Cerrar todas
+    document.querySelectorAll('.tool-section.tool-open').forEach(s => s.classList.remove('tool-open'));
+    // Abrir la clickeada si estaba cerrada
+    if (!isOpen) {
+        sec.classList.add('tool-open');
+        if (id === 'rapido') initModoRapido();
+        if (id === 'historial') renderHistorial();
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('toolsBtn')?.addEventListener('click', openToolsModal);
+});
+
+// ============================================================
+// HERRAMIENTA 1 — ¿Cuánto puedo pagar?
+// ============================================================
+window.calcularCapacidad = function() {
+    const sueldo  = parseFloat(document.getElementById('sueldoNeto')?.value) || 0;
+    const otros   = parseFloat(document.getElementById('otrosIngresos')?.value) || 0;
+    const deudas  = parseFloat(document.getElementById('otrasDeudas')?.value) || 0;
+    const ahorros = parseFloat(document.getElementById('ahorrosDisponibles')?.value) || 0;
+
+    const ingresoTotal = sueldo + otros;
+    if (ingresoTotal <= 0) { alert('Introduce tus ingresos mensuales'); return; }
+
+    // Criterio 35%: cuota máxima = 35% ingresos - otras deudas
+    const cuotaMax35 = ingresoTotal * 0.35 - deudas;
+    // Criterio 40% (más permisivo)
+    const cuotaMax40 = ingresoTotal * 0.40 - deudas;
+
+    if (cuotaMax35 <= 0) {
+        document.getElementById('capacidadResultado').style.display = 'block';
+        document.getElementById('capacidadResultado').innerHTML =
+            '<div class="alert alert-danger">⚠️ Con tus deudas actuales ya superas el 35% de endeudamiento. Reduce deudas antes de solicitar hipoteca.</div>';
+        return;
+    }
+
+    // Precio máximo con hipoteca a 25 años al 3.5% (referencia)
+    function precioMaxHipoteca(cuota, tipo, anos, pctEntrada, pctGastosCompra) {
+        const i = tipo / 100 / 12, n = anos * 12;
+        const prestamo = i > 0 ? cuota * (Math.pow(1+i,n)-1) / (i*Math.pow(1+i,n)) : cuota*n;
+        // prestamo = precio * (1 - entrada%) - pero gastos de compra salen del ahorro
+        // precio*(1-entrada%) = prestamo  →  precio = prestamo / (1-entrada%)
+        return prestamo / (1 - pctEntrada/100);
+    }
+
+    const tipo = 3.5, anos = 25;
+    const pctEntrada = 20, pctGastos = 11; // entrada + gastos ~31% del precio
+
+    const pm35 = precioMaxHipoteca(cuotaMax35, tipo, anos, pctEntrada, pctGastos);
+    const pm40 = precioMaxHipoteca(cuotaMax40, tipo, anos, pctEntrada, pctGastos);
+
+    // ¿Los ahorros cubren la entrada + gastos del precio máximo?
+    const entradaGastos35 = pm35 * (pctEntrada + pctGastos) / 100;
+    const entradaGastos40 = pm40 * (pctEntrada + pctGastos) / 100;
+    const limitadoPorAhorros = ahorros < entradaGastos35;
+
+    // Precio máximo limitado por ahorros: ahorros = precio * 0.31 → precio = ahorros/0.31
+    const pmAhorros = ahorros / ((pctEntrada + pctGastos) / 100);
+
+    const pmFinal35 = limitadoPorAhorros ? Math.min(pm35, pmAhorros) : pm35;
+    const pmFinal40 = limitadoPorAhorros ? Math.min(pm40, pmAhorros) : pm40;
+
+    const faltaAhorros = Math.max(0, entradaGastos35 - ahorros);
+
+    document.getElementById('capacidadResultado').style.display = 'block';
+    document.getElementById('capacidadResultado').innerHTML = `
+        <div class="capacidad-grid">
+            <div class="capacidad-escenario capacidad-escenario--conservador">
+                <div class="cap-label">Escenario conservador (35%)</div>
+                <div class="cap-precio">${fmt(Math.round(pmFinal35/1000)*1000)} €</div>
+                <div class="cap-detalle">Cuota máx: ${fmt(Math.round(cuotaMax35))} €/mes</div>
+                <div class="cap-detalle">Entrada + gastos: ${fmt(Math.round(pmFinal35*(pctEntrada+pctGastos)/100))} €</div>
+            </div>
+            <div class="capacidad-escenario capacidad-escenario--moderado">
+                <div class="cap-label">Escenario moderado (40%)</div>
+                <div class="cap-precio">${fmt(Math.round(pmFinal40/1000)*1000)} €</div>
+                <div class="cap-detalle">Cuota máx: ${fmt(Math.round(cuotaMax40))} €/mes</div>
+                <div class="cap-detalle">Entrada + gastos: ${fmt(Math.round(pmFinal40*(pctEntrada+pctGastos)/100))} €</div>
+            </div>
+        </div>
+        ${limitadoPorAhorros ? `<div class="alert alert-warning" style="margin-top:0.75rem;">⚠️ Capacidad limitada por ahorros. Necesitas <strong>${fmt(Math.round(entradaGastos35))} €</strong> para la entrada+gastos del escenario conservador. Te faltan <strong>${fmt(Math.round(faltaAhorros))} €</strong>.</div>` : ''}
+        <div class="cap-nota">* Cálculo con hipoteca a ${anos} años al ${tipo}%. Entrada 20% + gastos compra ~11%. Consulta con tu banco para condiciones reales.</div>
+        <button class="btn btn-primary" style="width:100%; margin-top:0.75rem;" onclick="cargarPrecioEnCalculadora(${Math.round(pmFinal35/1000)*1000})">✅ Usar ${fmt(Math.round(pmFinal35/1000)*1000)}€ en la calculadora</button>
+    `;
+};
+
+window.cargarPrecioEnCalculadora = function(precio) {
+    const el = document.getElementById('precio');
+    if (el) { el.value = precio; calcular(); switchTab('propiedad'); }
+    closeToolsModal();
+};
+
+// ============================================================
+// HERRAMIENTA 2 — Historial de CPs buscados
+// ============================================================
+const HISTORIAL_KEY = 'pisorentable_historial_v1';
+
+function getHistorial() {
+    try { return JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '[]'); }
+    catch(e) { return []; }
+}
+
+function addToHistorial(cp, provincia, precioM2) {
+    if (!cp || cp.length < 2) return;
+    let h = getHistorial();
+    // Eliminar si ya existe
+    h = h.filter(x => x.cp !== cp);
+    h.unshift({ cp, provincia, precioM2, fecha: new Date().toLocaleDateString('es-ES') });
+    if (h.length > 8) h = h.slice(0, 8);
+    localStorage.setItem(HISTORIAL_KEY, JSON.stringify(h));
+}
+
+function renderHistorial() {
+    const el = document.getElementById('historialList');
+    if (!el) return;
+    const h = getHistorial();
+    if (h.length === 0) {
+        el.innerHTML = '<p class="saved-empty">Aún no has buscado ningún código postal.<br>Escribe un CP en el panel de Propiedad para guardar el historial.</p>';
+        return;
+    }
+    el.innerHTML = h.map(item => `
+        <div class="historial-item">
+            <div class="historial-cp">${item.cp}</div>
+            <div class="historial-info">
+                <span class="historial-prov">${item.provincia}</span>
+                <span class="historial-precio">${item.precioM2?.toLocaleString('es-ES')} €/m²</span>
+            </div>
+            <div class="historial-fecha">${item.fecha}</div>
+            <button class="btn-saved-load" onclick="cargarCPHistorial('${item.cp}')" title="Cargar este CP">📍</button>
+        </div>
+    `).join('');
+}
+
+window.clearHistorial = function() {
+    localStorage.removeItem(HISTORIAL_KEY);
+    renderHistorial();
+};
+
+window.cargarCPHistorial = function(cp) {
+    const el = document.getElementById('codigoPostal');
+    if (el) { el.value = cp; actualizarMercado(); switchTab('propiedad'); }
+    closeToolsModal();
+};
+
+// Guardar en historial cuando se busca un CP válido
+const _origActualizarMercado = actualizarMercado;
+actualizarMercado = function() {
+    _origActualizarMercado();
+    const cp = (document.getElementById('codigoPostal')?.value || '').trim();
+    const prefix = cp.slice(0, 2);
+    const prov = prefix.length === 2 ? PROVINCIA_DATA[prefix] : null;
+    if (prov && cp.length >= 4) addToHistorial(cp, prov.nombre, prov.precioM2);
+};
+
+// ============================================================
+// HERRAMIENTA 3 — Modo rápido ¿Me sale la cuenta?
+// ============================================================
+function initModoRapido() {
+    ['rpPrecio','rpEntrada','rpAlquiler','rpAnos'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', calcularModoRapido);
+    });
+    calcularModoRapido();
+}
+
+function calcularModoRapido() {
+    const precio   = parseFloat(document.getElementById('rpPrecio')?.value) || 0;
+    const entrada  = parseFloat(document.getElementById('rpEntrada')?.value) || 0;
+    const alquiler = parseFloat(document.getElementById('rpAlquiler')?.value) || 0;
+    const anos     = parseFloat(document.getElementById('rpAnos')?.value) || 20;
+    const el       = document.getElementById('rapidoResultado');
+    if (!el || precio <= 0 || alquiler <= 0) return;
+
+    // Hipoteca estimada: prestamo a 3.5% 25 años
+    const prestamo = Math.max(0, precio - entrada);
+    const i = 3.5/100/12, n = 25*12;
+    const cuota = prestamo > 0 ? (i > 0 ? prestamo*i*Math.pow(1+i,n)/(Math.pow(1+i,n)-1) : prestamo/n) : 0;
+
+    // Gastos estimados: 1.5% precio/año
+    const gastosMes = precio * 0.015 / 12;
+    const cashflow = alquiler - cuota - gastosMes;
+    const rentaBruta = alquiler * 12 / precio * 100;
+
+    // Veredicto
+    let verdict, vClass, vIcon;
+    if (cashflow > 100 && rentaBruta > 5) {
+        verdict = '✅ Sí sale la cuenta'; vClass = 'rapido-verde'; vIcon = '🟢';
+    } else if (cashflow > -200 && rentaBruta > 4) {
+        verdict = '🟡 Sale justo — analiza más'; vClass = 'rapido-amarillo'; vIcon = '🟡';
+    } else {
+        verdict = '🔴 No sale la cuenta'; vClass = 'rapido-rojo'; vIcon = '🔴';
+    }
+
+    el.innerHTML = `
+        <div class="rapido-veredicto ${vClass}">
+            <span class="rapido-icon">${vIcon}</span>
+            <span class="rapido-texto">${verdict}</span>
+        </div>
+        <div class="rapido-metricas">
+            <div class="rapido-met">
+                <span class="rapido-met-label">Cashflow est.</span>
+                <span class="rapido-met-val ${cashflow >= 0 ? 'metric-positive':'metric-negative'}">${fmt(Math.round(cashflow))} €/mes</span>
+            </div>
+            <div class="rapido-met">
+                <span class="rapido-met-label">Renta bruta</span>
+                <span class="rapido-met-val ${rentaBruta>=5?'metric-positive':rentaBruta>=4?'metric-warning':'metric-negative'}">${rentaBruta.toFixed(1)}%</span>
+            </div>
+            <div class="rapido-met">
+                <span class="rapido-met-label">Cuota hip. est.</span>
+                <span class="rapido-met-val">${fmt(Math.round(cuota))} €/mes</span>
+            </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%; margin-top:0.75rem; font-size:0.85rem;" onclick="cargarEnCalculadora(${precio},${entrada},${alquiler},${anos})">
+            🧮 Analizar en detalle con todos los parámetros
+        </button>
+    `;
+}
+
+window.cargarEnCalculadora = function(precio, entrada, alquiler, anos) {
+    const fields = {precio, entradaEuros: entrada, alquiler, anosAnalisis: anos};
+    Object.entries(fields).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+    });
+    calcular();
+    closeToolsModal();
+};
+
+// ============================================================
+// HERRAMIENTA 4 — ROI de reforma
+// ============================================================
+window.calcularROIReforma = function() {
+    const coste         = parseFloat(document.getElementById('refCoste')?.value) || 0;
+    const alqAntes      = parseFloat(document.getElementById('refAlquilerAntes')?.value) || 0;
+    const alqDespues    = parseFloat(document.getElementById('refAlquilerDespues')?.value) || 0;
+    const plusvalia     = parseFloat(document.getElementById('refPlusvalia')?.value) || 0;
+    const el = document.getElementById('reformaResultado');
+    if (!el || coste <= 0) { alert('Introduce el coste de la reforma'); return; }
+
+    const mejoraMensual  = alqDespues - alqAntes;
+    const mejoraAnual    = mejoraMensual * 12;
+    const roi            = coste > 0 ? (mejoraAnual / coste * 100) : 0;
+    const payback        = mejoraAnual > 0 ? coste / mejoraAnual : Infinity;
+    const retornoTotal   = mejoraAnual * 10 + plusvalia; // 10 años
+    const roiTotal10     = coste > 0 ? (retornoTotal / coste * 100) : 0;
+
+    const roiClass = roi >= 10 ? 'metric-positive' : roi >= 5 ? 'metric-warning' : 'metric-negative';
+
+    el.style.display = 'block';
+    el.innerHTML = `
+        <div class="reforma-grid">
+            <div class="reforma-card">
+                <div class="reforma-card-label">ROI anual reforma</div>
+                <div class="reforma-card-val ${roiClass}">${roi.toFixed(1)}%</div>
+                <div class="reforma-card-sub">sobre el coste invertido</div>
+            </div>
+            <div class="reforma-card">
+                <div class="reforma-card-label">Payback (recuperación)</div>
+                <div class="reforma-card-val">${payback === Infinity ? '∞' : payback.toFixed(1)} años</div>
+                <div class="reforma-card-sub">solo por mayor alquiler</div>
+            </div>
+            <div class="reforma-card">
+                <div class="reforma-card-label">Mejora mensual</div>
+                <div class="reforma-card-val metric-positive">+${fmt(Math.round(mejoraMensual))} €/mes</div>
+                <div class="reforma-card-sub">${fmt(Math.round(mejoraAnual))} €/año</div>
+            </div>
+            <div class="reforma-card">
+                <div class="reforma-card-label">Retorno total 10 años</div>
+                <div class="reforma-card-val metric-positive">${fmt(Math.round(retornoTotal))} €</div>
+                <div class="reforma-card-sub">alquiler + plusvalía</div>
+            </div>
+        </div>
+        <div class="cap-nota" style="margin-top:0.75rem;">* Incluye ${fmt(Math.round(plusvalia))} € de plusvalía estimada. El ROI real depende de retención de inquilinos y mercado local.</div>
+    `;
+};
+
+// ============================================================
+// HERRAMIENTA 5 — Simulador Euríbor hipoteca variable
+// ============================================================
+window.calcularEuribor = function() {
+    const capital      = parseFloat(document.getElementById('eurCapital')?.value) || 0;
+    const diferencial  = parseFloat(document.getElementById('eurDiferencial')?.value) || 0.75;
+    const anos         = parseFloat(document.getElementById('eurAnos')?.value) || 20;
+    const alquiler     = parseFloat(document.getElementById('eurAlquiler')?.value) || 0;
+    const gastos       = parseFloat(document.getElementById('eurGastos')?.value) || 0;
+    const el = document.getElementById('euriborResultado');
+    if (!el || capital <= 0) { alert('Introduce el capital pendiente'); return; }
+
+    function cuotaHip(euribor) {
+        const tipo = Math.max(0, euribor + diferencial);
+        const i = tipo / 100 / 12, n = anos * 12;
+        return i > 0 ? capital * i * Math.pow(1+i,n) / (Math.pow(1+i,n)-1) : capital/n;
+    }
+
+    // Escenarios Euríbor
+    const escenarios = [
+        { label: 'Euríbor -1% (bajada fuerte)', euribor: -0.5, icon: '📉' },
+        { label: 'Euríbor actual ~2.5%',         euribor:  2.5, icon: '📊', actual: true },
+        { label: 'Euríbor +1% (subida moderada)',euribor:  3.5, icon: '⚠️' },
+        { label: 'Euríbor +2% (subida fuerte)',  euribor:  4.5, icon: '🔴' },
+        { label: 'Euríbor +4% (escenario 2022)', euribor:  4.0, icon: '🚨' },
+    ];
+
+    const filas = escenarios.map(esc => {
+        const tipo = Math.max(0, esc.euribor + diferencial);
+        const cuota = cuotaHip(esc.euribor);
+        const cf = alquiler - cuota - gastos;
+        const cfClass = cf >= 0 ? 'metric-positive' : 'metric-negative';
+        return `
+            <tr class="${esc.actual ? 'eur-actual-row' : ''}">
+                <td>${esc.icon} <span style="font-size:0.82rem;">${esc.label}</span></td>
+                <td style="text-align:center; font-weight:700;">${tipo.toFixed(2)}%</td>
+                <td style="text-align:right; font-weight:700;">${fmt(Math.round(cuota))} €</td>
+                <td style="text-align:right;" class="${cfClass}">${fmt(Math.round(cf))} €</td>
+            </tr>`;
+    }).join('');
+
+    const cuotaActual = cuotaHip(2.5);
+    const cfActual = alquiler - cuotaActual - gastos;
+
+    el.style.display = 'block';
+    el.innerHTML = `
+        <div class="eur-summary">
+            <span>Con Euríbor actual (~2.5%): cuota <strong>${fmt(Math.round(cuotaActual))} €/mes</strong>, cashflow <strong class="${cfActual>=0?'metric-positive':'metric-negative'}">${fmt(Math.round(cfActual))} €/mes</strong></span>
+        </div>
+        <div class="eur-table-wrap">
+            <table class="eur-table">
+                <thead>
+                    <tr>
+                        <th>Escenario</th>
+                        <th style="text-align:center;">Tipo total</th>
+                        <th style="text-align:right;">Cuota</th>
+                        <th style="text-align:right;">Cashflow</th>
+                    </tr>
+                </thead>
+                <tbody>${filas}</tbody>
+            </table>
+        </div>
+        <div class="cap-nota" style="margin-top:0.75rem;">* Cashflow = alquiler - cuota - gastos fijos. Tipo total = Euríbor + diferencial ${diferencial}%.</div>
+    `;
+};
